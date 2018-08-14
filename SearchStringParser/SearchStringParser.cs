@@ -16,10 +16,16 @@ namespace SearchStringParser {
             return parser.result;
         }
 
-        void ParseCore(string text, SearchStringParseSettings settings) {
+        void ParseCore(string searchText, SearchStringParseSettings settings) {
+            ParseRegularText(searchText, settings);
+        }
+
+        void ParseRegularText(string searchText, SearchStringParseSettings settings) {
             var info = new SearchStringParseInfo(settings.SearchMode);
             result.ForAll.Add(info);
-            ParsePhase(text, info);
+            foreach(var phase in (searchText ?? String.Empty).Split(new[] { settings.PhaseSeparator }, StringSplitOptions.RemoveEmptyEntries)) {
+                ParsePhase(phase, info);
+            }
         }
 
         void ParsePhase(string phase, SearchStringParseInfo info) {

@@ -22,15 +22,16 @@ namespace SearchStringParser.Tests {
         public void SinglePhase() {
             Parse("a").AssertSingleForAll("a");
             Parse("ab").AssertSingleForAll("ab");
+            Parse("a ").AssertSingleForAll("a");
+            Parse(" a").AssertSingleForAll("a");
+            Parse(" a ").AssertSingleForAll("a");
+            Parse("").AssertSingleForAll();
+            Parse(null).AssertSingleForAll();
         }
 
         [Test]
         public void TwoPhases() {
-            var result = Parse("a b");
-            Assert.AreEqual(0, result.FieldSpecific.Count);
-            Assert.AreEqual(2, result.ForAll.Count);
-            result.ForAll[0].AssertParseInfo("a");
-            result.ForAll[1].AssertParseInfo("b");
+            Parse("a b").AssertSingleForAll("a", "b");
         }
     }
 }
