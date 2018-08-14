@@ -17,23 +17,23 @@ namespace SearchStringParser {
         }
 
         void ParseCore(string text, SearchStringParseSettings settings) {
-            var info = new SearchStringFieldParseInfo(settings.SearchMode);
+            var info = new SearchStringParseInfo(settings.SearchMode);
             result.ForAll.Add(info);
             ParsePhase(text, info);
         }
 
-        void ParsePhase(string phase, SearchStringFieldParseInfo info) {
+        void ParsePhase(string phase, SearchStringParseInfo info) {
             info.SearchStrings.Add(phase);
         }
     }
 
     public class SearchStringParseResult {
-        public List<SearchStringFieldParseInfo> ForAll { get; } = new List<SearchStringFieldParseInfo>();
-        public Dictionary<string, List<SearchStringFieldParseInfo>> FieldSpecific { get; } = new Dictionary<string, List<SearchStringFieldParseInfo>>();
+        public List<SearchStringParseInfo> ForAll { get; } = new List<SearchStringParseInfo>();
+        public Dictionary<string, List<SearchStringParseInfo>> FieldSpecific { get; } = new Dictionary<string, List<SearchStringParseInfo>>();
     }
 
-    public class SearchStringFieldParseInfo {
-        public SearchStringFieldParseInfo(SearchMode searchMode) {
+    public class SearchStringParseInfo {
+        public SearchStringParseInfo(SearchMode searchMode) {
             SearchMode = searchMode;
         }
 
@@ -50,15 +50,17 @@ namespace SearchStringParser {
     }
 
     public class SearchStringParseSettings {
-        public SearchStringParseSettings(SearchMode searchMode) {
+        public SearchStringParseSettings(SearchMode searchMode, string phaseSeparator) {
             SearchMode = searchMode;
+            PhaseSeparator = phaseSeparator;
         }
 
         public SearchMode SearchMode { get; }
+        public string PhaseSeparator { get; }
 
         public static SearchStringParseSettings Default {
             get {
-                return new SearchStringParseSettings(SearchMode.Like);
+                return new SearchStringParseSettings(SearchMode.Like, " ");
             }
         }
     }

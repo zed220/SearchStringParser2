@@ -1,7 +1,7 @@
 ﻿using NUnit.Framework;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,19 +10,27 @@ namespace SearchStringParser.Tests {
         static SearchStringParseResult Parse(string text, SearchStringParseSettings settings = null) {
             return SearchStringParser.Parse(text, settings ?? SearchStringParseSettings.Default);
         }
-        static void AssertSingleForAll(SearchStringParseResult result, SearchMode searchMode, params string[] searchTexts) {
-            Assert.AreEqual(1, result.ForAll.Count);
-            Assert.AreEqual(searchTexts.Length, result.ForAll.Single().SearchStrings.Count);
-            for(int i = 0; i < searchTexts.Length; i++) {
-                Assert.AreEqual(searchTexts[i], result.ForAll.Single().SearchStrings[i]);
-                Assert.AreEqual(searchMode, result.ForAll.Single().SearchMode);
-            }
+
+        [Test]
+        public void DefaultSettings() {
+            Assert.AreEqual(2, typeof(SearchStringParseSettings).GetProperties(BindingFlags.Public | BindingFlags.Instance).Length);
+            Assert.AreEqual(SearchMode.Like, SearchStringParseSettings.Default.SearchMode);
+            Assert.AreEqual(" ", SearchStringParseSettings.Default.PhaseSeparator);
         }
 
         [Test]
-        public void SingleChar() {
-            AssertSingleForAll(Parse("a"), SearchStringParseSettings.Default.SearchMode, "a");
-            AssertSingleForAll(Parse("ab"), SearchStringParseSettings.Default.SearchMode, "ab");
+        public void SinglePhase() {
+            Parse("a").AssertSingleForAll("a");
+            Parse("ab").AssertSingleForAll("ab");
+        }
+
+        [Test]
+        public void TwoPhases() {
+            var result = Parse("a b");
+            Assert.AreEqual(0, result.FieldSpecific.Count);
+            Assert.AreEqual(2, result.ForAll.Count);
+            result.ForAll[0].AssertParseInfo("a");
+            result.ForAll[1].AssertParseInfo("b");
         }
     }
 }

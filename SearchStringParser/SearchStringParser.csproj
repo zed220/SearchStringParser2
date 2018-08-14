@@ -54,6 +54,7 @@
     <Compile Include="SearchStringParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tests\ParseTests.cs" />
+    <Compile Include="Tests\ParseTestsExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
