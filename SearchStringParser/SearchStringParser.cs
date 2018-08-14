@@ -6,14 +6,24 @@ using System.Threading.Tasks;
 
 namespace SearchStringParser {
     public class SearchStringParser {
+        SearchStringParseResult result = new SearchStringParseResult();
+
         SearchStringParser() { }
 
         public static SearchStringParseResult Parse(string text, SearchStringParseSettings settings) {
-            return new SearchStringParser().ParseCore(text, settings);
+            var parser = new SearchStringParser();
+            parser.ParseCore(text, settings);
+            return parser.result;
         }
 
-        SearchStringParseResult ParseCore(string text, SearchStringParseSettings settings) {
-            return null;
+        void ParseCore(string text, SearchStringParseSettings settings) {
+            var info = new SearchStringFieldParseInfo(settings.SearchMode);
+            result.ForAll.Add(info);
+            ParsePhase(text, info);
+        }
+
+        void ParsePhase(string phase, SearchStringFieldParseInfo info) {
+            info.SearchStrings.Add(phase);
         }
     }
 
@@ -40,9 +50,15 @@ namespace SearchStringParser {
     }
 
     public class SearchStringParseSettings {
+        public SearchStringParseSettings(SearchMode searchMode) {
+            SearchMode = searchMode;
+        }
+
+        public SearchMode SearchMode { get; }
+
         public static SearchStringParseSettings Default {
             get {
-                return new SearchStringParseSettings();
+                return new SearchStringParseSettings(SearchMode.Like);
             }
         }
     }
