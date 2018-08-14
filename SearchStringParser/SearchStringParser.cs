@@ -7,8 +7,7 @@ using System.Threading.Tasks;
 namespace SearchStringParser {
     public class SearchStringParser {
         readonly SearchStringParseSettings settings;
-
-        SearchStringParseResult result = new SearchStringParseResult();
+        readonly SearchStringParseResult result = new SearchStringParseResult();
 
         SearchStringParser(SearchStringParseSettings settings) {
             this.settings = settings;
@@ -21,12 +20,9 @@ namespace SearchStringParser {
         }
 
         void ParseCore(string searchText) {
-            //var info = new SearchStringParseInfo(settings.SearchMode);
             foreach(var phase in (searchText ?? String.Empty).Split(new[] { settings.PhaseSeparator }, StringSplitOptions.RemoveEmptyEntries)) {
                 ParsePhase(phase);
             }
-            //if(info.SearchStrings.Count > 0)
-            //    result.ForAll.Add(info);
         }
 
         void ParsePhase(string phase) {

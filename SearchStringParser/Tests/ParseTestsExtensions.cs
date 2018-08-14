@@ -4,14 +4,16 @@ using System.Linq;
 
 namespace SearchStringParser.Tests {
     public static class ParseTestsExtensions {
-        const string ForAll = nameof(SearchStringParseResult.ForAll);
-        const string Include = nameof(SearchStringParseResult.Include);
+        const string Exclude = nameof(SearchStringParseResult.Exclude);
 
         public static SearchStringParseResult AssertSingleForAll(this SearchStringParseResult result, params string[] searchTexts) {
-            return AssertSingle(result, ForAll, null, searchTexts);
+            return AssertSingle(result, nameof(SearchStringParseResult.ForAll), null, searchTexts);
         }
         public static SearchStringParseResult AssertSingleInclude(this SearchStringParseResult result, params string[] searchTexts) {
-            return AssertSingle(result, Include, null, searchTexts);
+            return AssertSingle(result, nameof(SearchStringParseResult.Include), null, searchTexts);
+        }
+        public static SearchStringParseResult AssertSingleExclude(this SearchStringParseResult result, params string[] searchTexts) {
+            return AssertSingle(result, nameof(SearchStringParseResult.Exclude), null, searchTexts);
         }
         static SearchStringParseResult AssertSingle(this SearchStringParseResult result, string propName, SearchMode? searchMode, params string[] searchTexts) {
             var collection = result.GetType().GetProperty(propName).GetValue(result) as List<SearchStringParseInfo>;

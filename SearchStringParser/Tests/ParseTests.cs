@@ -16,10 +16,11 @@ namespace SearchStringParser.Tests {
 
         [Test]
         public void DefaultSettings() {
-            Assert.AreEqual(3, typeof(SearchStringParseSettings).GetProperties(BindingFlags.Public | BindingFlags.Instance).Length);
+            Assert.AreEqual(4, typeof(SearchStringParseSettings).GetProperties(BindingFlags.Public | BindingFlags.Instance).Length);
             Assert.AreEqual(SearchMode.Like, SearchStringParseSettings.Default.SearchMode);
             Assert.AreEqual(" ", SearchStringParseSettings.Default.PhaseSeparator);
             Assert.AreEqual("+", SearchStringParseSettings.Default.IncludeModificator);
+            Assert.AreEqual("-", SearchStringParseSettings.Default.ExcludeModificator);
         }
 
         [Test]
