@@ -6,4 +6,7 @@
         StartsWith,
         EndsWith
     }
+    public enum SearchModificator {
+        None, Include, Exclude
+    }
 }

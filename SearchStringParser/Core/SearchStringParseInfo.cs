@@ -2,11 +2,12 @@
 
 namespace SearchStringParser {
     public class SearchStringParseInfo {
-        public SearchStringParseInfo(SearchMode searchMode) {
+        public SearchStringParseInfo(SearchMode searchMode, string searchString) {
             SearchMode = searchMode;
+            SearchString = searchString;
         }
 
-        public List<string> SearchStrings { get; } = new List<string>();
+        public string SearchString { get; }
         public SearchMode SearchMode { get; }
     }
 }

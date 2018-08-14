@@ -1,25 +1,34 @@
 ﻿using NUnit.Framework;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace SearchStringParser.Tests {
     public static class ParseTestsExtensions {
-        public static void AssertSingleForAll(this SearchStringParseResult result, params string[] searchTexts) {
-            AssertSingleForAll(result, null, searchTexts);
+        const string ForAll = nameof(SearchStringParseResult.ForAll);
+        const string Include = nameof(SearchStringParseResult.Include);
+
+        public static SearchStringParseResult AssertSingleForAll(this SearchStringParseResult result, params string[] searchTexts) {
+            return AssertSingle(result, ForAll, null, searchTexts);
         }
-        public static void AssertSingleForAll(this SearchStringParseResult result, SearchMode? searchMode, params string[] searchTexts) {
-            Assert.AreEqual(1, result.ForAll.Count);
-            Assert.AreEqual(0, result.FieldSpecific.Count);
-            Assert.AreEqual(searchTexts.Length, result.ForAll.Single().SearchStrings.Count);
+        public static SearchStringParseResult AssertSingleInclude(this SearchStringParseResult result, params string[] searchTexts) {
+            return AssertSingle(result, Include, null, searchTexts);
+        }
+        static SearchStringParseResult AssertSingle(this SearchStringParseResult result, string propName, SearchMode? searchMode, params string[] searchTexts) {
+            var collection = result.GetType().GetProperty(propName).GetValue(result) as List<SearchStringParseInfo>;
+            Assert.AreEqual(searchTexts.Length, collection.Count);
+            //Assert.AreEqual(0, result.FieldSpecific.Count);
             for(int i = 0; i < searchTexts.Length; i++)
-                AssertParseInfo(result.ForAll.Single(), searchMode, searchTexts);
+                AssertParseInfo(collection[i], searchMode, searchTexts[i]);
+            return result;
         }
-        public static void AssertParseInfo(this SearchStringParseInfo info, params string[] searchTexts) {
-            AssertParseInfo(info, null, searchTexts);
-        }
-        public static void AssertParseInfo(this SearchStringParseInfo info, SearchMode? searchMode, params string[] searchTexts) {
+
+        //static SearchStringParseInfo AssertParseInfo(this SearchStringParseInfo info, params string[] searchTexts) {
+        //    return AssertParseInfo(info, null, searchTexts);
+        //}
+        static SearchStringParseInfo AssertParseInfo(this SearchStringParseInfo info, SearchMode? searchMode, string searchText) {
             Assert.AreEqual(searchMode ?? SearchStringParseSettings.Default.SearchMode, info.SearchMode);
-            for(int i = 0; i < searchTexts.Length; i++)
-                Assert.AreEqual(searchTexts[i], info.SearchStrings[i]);
+            Assert.AreEqual(searchText, info.SearchString);
+            return info;
         }
     }
 }

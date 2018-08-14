@@ -51,9 +51,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Core\SearchMode.cs" />
+    <Compile Include="Core\Enums.cs" />
     <Compile Include="Core\SearchStringParseInfo.cs" />
-    <Compile Include="Core\SearchStringParser.cs" />
+    <Compile Include="SearchStringParser.cs" />
     <Compile Include="Core\SearchStringParseResult.cs" />
     <Compile Include="Core\SearchStringParseSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
