@@ -30,8 +30,9 @@ namespace SearchStringParser.Tests {
         }
 
         [Test]
-        public void TwoPhases() {
+        public void SeveralPhases() {
             Parse("a b").AssertSingleForAll("a", "b");
+            Parse("a b c").AssertSingleForAll("a", "b", "c");
         }
     }
 }
