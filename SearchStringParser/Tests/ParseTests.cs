@@ -97,5 +97,9 @@ namespace SearchStringParser.Tests {
             Parse(cGroup + "a").AssertSingleForAll(cGroup + "a").AssertSingleInclude().AssertSingleExclude();
             Parse("a" + cGroup).AssertSingleForAll("a" + cGroup).AssertSingleInclude().AssertSingleExclude();
         }
+        [Test]
+        public void IgnoreGrouping() {
+            Parse(cGroup.ToString() + cGroup + cGroup).AssertSingleForAll(cGroup.ToString()).AssertSingleInclude().AssertSingleExclude();
+        }
     }
 }
