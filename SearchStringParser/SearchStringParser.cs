@@ -15,31 +15,72 @@ namespace SearchStringParser {
 
         public static SearchStringParseResult Parse(string text, SearchStringParseSettings settings) {
             var parser = new SearchStringParser(settings);
-            parser.ParseCore(text);
+            parser.ParseString(text);
             return parser.result;
         }
 
-        void ParseCore(string searchText) {
-            foreach(var phase in (searchText ?? String.Empty).Split(new[] { settings.PhaseSeparator }, StringSplitOptions.RemoveEmptyEntries)) {
-                ParsePhase(phase);
+        enum PhaseMode { Default, Exclude, Include }
+
+        void ParseString(string searchText) {
+            if(searchText == null)
+                return;
+            string phase = String.Empty;
+            PhaseMode mode = PhaseMode.Default;
+            bool group = false;
+            foreach(char c in searchText) {
+                if(phase == string.Empty) {
+                    if(c == settings.GroupModificator) {
+                        group = true;
+                        continue;
+                    }
+                    if(!group) {
+                        if(c == settings.ExcludeModificator) {
+                            mode = PhaseMode.Exclude;
+                            continue;
+                        }
+                        if(c == settings.IncludeModificator) {
+                            mode = PhaseMode.Include;
+                            continue;
+                        }
+                    }
+                }
+                if(!group) {
+                    if(c == settings.PhaseSeparator) {
+                        BuildPhase(phase, mode);
+                        phase = string.Empty;
+                        mode = PhaseMode.Default;
+                        continue;
+                    }
+                }
+                if(c == settings.GroupModificator) {
+                    BuildPhase(phase, mode);
+                    phase = string.Empty;
+                    mode = PhaseMode.Default;
+                    continue;
+                }
+                phase += c;
             }
+            BuildPhase(phase, mode);
         }
 
-        void ParsePhase(string phase) {
-            if(phase.StartsWith(settings.IncludeModificator)) {
-                AddInfo(result.Include, phase.Remove(0, settings.IncludeModificator.Length));
+        void BuildPhase(string phase, PhaseMode mode) {
+            if(phase == string.Empty)
                 return;
+            switch(mode) {
+                case PhaseMode.Default:
+                    AddInfo(result.ForAll, phase);
+                    break;
+                case PhaseMode.Exclude:
+                    AddInfo(result.Exclude, phase);
+                    break;
+                case PhaseMode.Include:
+                    AddInfo(result.Include, phase);
+                    break;
             }
-            if(phase.StartsWith(settings.ExcludeModificator)) {
-                AddInfo(result.Exclude, phase.Remove(0, settings.ExcludeModificator.Length));
-                return;
-            }
-            AddInfo(result.ForAll, phase);
         }
 
         void AddInfo(List<SearchStringParseInfo> target, string phase) {
-            var info = new SearchStringParseInfo(settings.SearchMode, phase);
-            target.Add(info);
+            target.Add(new SearchStringParseInfo(settings.SearchMode, phase));
         }
     }
 }
