@@ -7,17 +7,22 @@ using System.Threading.Tasks;
 
 namespace SearchStringParser.Tests {
     public class ParseTests {
+        static char cInclude { get { return SearchStringParseSettings.Default.IncludeModificator; } }
+        static char cExclude { get { return SearchStringParseSettings.Default.ExcludeModificator; } }
+        static char cGroup { get { return SearchStringParseSettings.Default.GroupModificator; } }
+        static char cSpace { get { return SearchStringParseSettings.Default.PhaseSeparator; } }
+
         static SearchStringParseResult Parse(string text, SearchStringParseSettings settings = null) {
             return SearchStringParser.Parse(text, settings ?? SearchStringParseSettings.Default);
         }
         static string Include(string searchString) {
-            return SearchStringParseSettings.Default.IncludeModificator + searchString;
+            return cInclude + searchString;
         }
         static string Exclude(string searchString) {
-            return SearchStringParseSettings.Default.ExcludeModificator + searchString;
+            return cExclude + searchString;
         }
         static string Group(string searchString) {
-            return SearchStringParseSettings.Default.GroupModificator + searchString + SearchStringParseSettings.Default.GroupModificator;
+            return cGroup + searchString + cGroup;
         }
 
         [Test]
@@ -29,15 +34,13 @@ namespace SearchStringParser.Tests {
             Assert.AreEqual('-', SearchStringParseSettings.Default.ExcludeModificator);
             Assert.AreEqual('"', SearchStringParseSettings.Default.GroupModificator);
         }
-
         [Test]
-        public void BoundaryValues() {
+        public void BoundaryValues_Elemental() {
             Parse(null).AssertSingleForAll().AssertSingleInclude().AssertSingleExclude();
             Parse("").AssertSingleForAll().AssertSingleInclude().AssertSingleExclude();
-            Parse(" ").AssertSingleForAll().AssertSingleInclude().AssertSingleExclude();
-            Parse("  ").AssertSingleForAll().AssertSingleInclude().AssertSingleExclude();
+            Parse(cSpace.ToString()).AssertSingleForAll().AssertSingleInclude().AssertSingleExclude();
+            Parse(cSpace.ToString() + cSpace.ToString()).AssertSingleForAll().AssertSingleInclude().AssertSingleExclude();
         }
-
         [Test]
         public void SimpleParsing() {
             Parse("a").AssertSingleForAll("a").AssertSingleInclude().AssertSingleExclude();
@@ -48,7 +51,6 @@ namespace SearchStringParser.Tests {
             Parse("a b").AssertSingleForAll("a", "b").AssertSingleInclude().AssertSingleExclude();
             Parse("a b c").AssertSingleForAll("a", "b", "c").AssertSingleInclude().AssertSingleExclude();
         }
-
         [Test]
         public void ModificatorInclude() {
             Parse(Include("a")).AssertSingleForAll().AssertSingleInclude("a").AssertSingleExclude();
@@ -57,7 +59,6 @@ namespace SearchStringParser.Tests {
             Parse("ab " + Include("c")).AssertSingleForAll("ab").AssertSingleInclude("c").AssertSingleExclude();
             Parse(Include("a") + " " + Include("b")).AssertSingleForAll().AssertSingleInclude("a", "b").AssertSingleExclude();
         }
-
         [Test]
         public void ModificatorExclude() {
             Parse(Exclude("a")).AssertSingleForAll().AssertSingleExclude("a").AssertSingleInclude();
@@ -66,7 +67,6 @@ namespace SearchStringParser.Tests {
             Parse("ab " + Exclude("c")).AssertSingleForAll("ab").AssertSingleExclude("c").AssertSingleInclude();
             Parse(Exclude("a") + " " + Exclude("b")).AssertSingleForAll().AssertSingleExclude("a", "b").AssertSingleInclude();
         }
-
         [Test]
         public void ModificatorIncludeExclude() {
             Parse(Exclude("a") + " " + Include("b")).AssertSingleForAll().AssertSingleExclude("a").AssertSingleInclude("b");
@@ -74,7 +74,6 @@ namespace SearchStringParser.Tests {
             Parse(Exclude("a") + " c " + Include("b")).AssertSingleForAll("c").AssertSingleExclude("a").AssertSingleInclude("b");
             Parse(Exclude("b") + " c " + Include("a")).AssertSingleForAll("c").AssertSingleExclude("b").AssertSingleInclude("a");
         }
-
         [Test]
         public void ModificatorGroup() {
             Parse(Group("a")).AssertSingleForAll("a").AssertSingleInclude().AssertSingleExclude();
@@ -82,6 +81,16 @@ namespace SearchStringParser.Tests {
             Parse(Exclude(Group("a"))).AssertSingleForAll().AssertSingleInclude().AssertSingleExclude("a");
             Parse(Group(Include("a"))).AssertSingleForAll(Include("a")).AssertSingleInclude().AssertSingleExclude();
             Parse(Group(Exclude("a"))).AssertSingleForAll(Exclude("a")).AssertSingleInclude().AssertSingleExclude();
+        }
+        [Test]
+        public void BoundaryValues_Constants() {
+            Action<char> assert = c => {
+                Parse(c.ToString()).AssertSingleForAll(c.ToString()).AssertSingleInclude().AssertSingleExclude();
+                Parse(c.ToString() + c.ToString()).AssertSingleForAll(c.ToString()).AssertSingleInclude().AssertSingleExclude();
+            };
+            assert(cExclude);
+            assert(cInclude);
+            assert(cGroup);
         }
     }
 }

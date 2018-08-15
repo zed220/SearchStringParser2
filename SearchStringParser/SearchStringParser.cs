@@ -21,60 +21,87 @@ namespace SearchStringParser {
 
         enum PhaseMode { Default, Exclude, Include }
 
+        class ParsingState {
+            public ParsingState() {
+                Flush();
+            }
+
+            public string Phase;
+            public PhaseMode PhaseMode;
+            public bool Group;
+
+            public void Flush() {
+                Phase = String.Empty;
+                PhaseMode = PhaseMode.Default;
+                Group = false;
+            }
+        }
+
         void ParseString(string searchText) {
             if(searchText == null)
                 return;
-            string phase = String.Empty;
-            PhaseMode mode = PhaseMode.Default;
-            bool group = false;
+            ParsingState state = new ParsingState();
             foreach(char c in searchText) {
-                if(phase == string.Empty) {
+                if(state.Phase == string.Empty) {
                     if(c == settings.GroupModificator) {
-                        group = true;
+                        state.Group = true;
                         continue;
                     }
-                    if(!group) {
+                    if(!state.Group) {
                         if(c == settings.ExcludeModificator) {
-                            mode = PhaseMode.Exclude;
+                            state.PhaseMode = PhaseMode.Exclude;
                             continue;
                         }
                         if(c == settings.IncludeModificator) {
-                            mode = PhaseMode.Include;
+                            state.PhaseMode = PhaseMode.Include;
                             continue;
                         }
                     }
                 }
-                if(!group) {
+                if(!state.Group) {
                     if(c == settings.PhaseSeparator) {
-                        BuildPhase(phase, mode);
-                        phase = string.Empty;
-                        mode = PhaseMode.Default;
+                        BuildPhase(state);
                         continue;
                     }
                 }
                 if(c == settings.GroupModificator) {
-                    BuildPhase(phase, mode);
-                    phase = string.Empty;
-                    mode = PhaseMode.Default;
+                    BuildPhase(state);
                     continue;
                 }
-                phase += c;
+                state.Phase += c;
             }
-            BuildPhase(phase, mode);
+            BuildPhase(state);
         }
 
-        void BuildPhase(string phase, PhaseMode mode) {
-            if(phase == string.Empty)
+        void BuildPhase(ParsingState state) {
+            BuildPhaseCore(state);
+            state.Flush();
+        }
+        void BuildPhaseCore(ParsingState state) {
+            if(state.Phase == string.Empty) {
+                switch(state.PhaseMode) {
+                    case PhaseMode.Default:
+                        if(state.Group)
+                            AddInfo(result.ForAll, settings.GroupModificator.ToString());
+                        return;
+                    case PhaseMode.Exclude:
+                        AddInfo(result.ForAll, settings.ExcludeModificator.ToString());
+                        break;
+                    case PhaseMode.Include:
+                        AddInfo(result.ForAll, settings.IncludeModificator.ToString());
+                        break;
+                }
                 return;
-            switch(mode) {
+            }
+            switch(state.PhaseMode) {
                 case PhaseMode.Default:
-                    AddInfo(result.ForAll, phase);
+                    AddInfo(result.ForAll, state.Phase);
                     break;
                 case PhaseMode.Exclude:
-                    AddInfo(result.Exclude, phase);
+                    AddInfo(result.Exclude, state.Phase);
                     break;
                 case PhaseMode.Include:
-                    AddInfo(result.Include, phase);
+                    AddInfo(result.Include, state.Phase);
                     break;
             }
         }
