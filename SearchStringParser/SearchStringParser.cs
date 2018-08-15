@@ -22,10 +22,10 @@ namespace SearchStringParser {
 
             public void Flush() {
                 Phase = String.Empty;
+                Field = null;
                 PhaseMode = PhaseMode.Default;
                 GroupStarted = false;
                 GroupFinished = false;
-                Field = null;
             }
         }
 
@@ -58,13 +58,15 @@ namespace SearchStringParser {
                             state.GroupStarted = true;
                             continue;
                         }
-                        if(c == settings.ExcludeModificator) {
-                            state.PhaseMode = PhaseMode.Exclude;
-                            continue;
-                        }
-                        if(c == settings.IncludeModificator) {
-                            state.PhaseMode = PhaseMode.Include;
-                            continue;
+                        if(state.PhaseMode == PhaseMode.Default) {
+                            if(c == settings.ExcludeModificator) {
+                                state.PhaseMode = PhaseMode.Exclude;
+                                continue;
+                            }
+                            if(c == settings.IncludeModificator) {
+                                state.PhaseMode = PhaseMode.Include;
+                                continue;
+                            }
                         }
                     }
                 }
@@ -97,6 +99,12 @@ namespace SearchStringParser {
             state.Flush();
         }
         void BuildPhaseCore() {
+            if(state.Phase == string.Empty) {
+                if(state.Field != null) {
+                    state.Phase = state.Field + settings.SpecificFieldModificator;
+                    state.Field = null;
+                }
+            }
             if(state.Phase == string.Empty) {
                 switch(state.PhaseMode) {
                     case PhaseMode.Default:

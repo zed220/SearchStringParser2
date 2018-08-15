@@ -92,11 +92,20 @@ namespace SearchStringParser.Tests {
         public void BoundaryValues_Constants() {
             Action<char> assert = c => {
                 Parse(c.ToString()).AssertRegular(c.ToString()).AssertInclude().AssertExclude();
-                Parse(c.ToString() + c.ToString()).AssertRegular(c.ToString()).AssertInclude().AssertExclude();
             };
             assert(cExclude);
             assert(cInclude);
             assert(cGroup);
+            assert(cSpecificField);
+        }
+        [Test]
+        public void BoundaryValues_DoubleConstants() {
+            Func<char, string> makeDouble = c => c.ToString() + c;
+            Parse(makeDouble(cInclude)).AssertRegular().AssertInclude(cInclude.ToString()).AssertExclude();
+            Parse(makeDouble(cExclude)).AssertRegular().AssertInclude().AssertExclude(cExclude.ToString());
+            Parse(makeDouble(cGroup)).AssertRegular(cGroup.ToString()).AssertInclude().AssertExclude();
+            Parse(makeDouble(cGroup) + cGroup).AssertRegular(cGroup.ToString()).AssertInclude().AssertExclude();
+            Parse(makeDouble(cSpecificField)).AssertRegular(cSpecificField.ToString()).AssertInclude().AssertExclude();
         }
         [Test]
         public void UnfinishedGroup() {
