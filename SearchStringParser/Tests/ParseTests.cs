@@ -77,6 +77,7 @@ namespace SearchStringParser.Tests {
         [Test]
         public void ModificatorGroup() {
             Parse(Group("a")).AssertSingleForAll("a").AssertSingleInclude().AssertSingleExclude();
+            Parse(Group("a b")).AssertSingleForAll("a b").AssertSingleInclude().AssertSingleExclude();
             Parse(Include(Group("a"))).AssertSingleForAll().AssertSingleInclude("a").AssertSingleExclude();
             Parse(Exclude(Group("a"))).AssertSingleForAll().AssertSingleInclude().AssertSingleExclude("a");
             Parse(Group(Include("a"))).AssertSingleForAll(Include("a")).AssertSingleInclude().AssertSingleExclude();
