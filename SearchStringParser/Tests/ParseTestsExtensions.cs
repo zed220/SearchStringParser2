@@ -4,29 +4,39 @@ using System.Linq;
 
 namespace SearchStringParser.Tests {
     public static class ParseTestsExtensions {
-        public static SearchStringParseResult AssertSingleForAll(this SearchStringParseResult result, params string[] searchTexts) {
-            return AssertSingle(result, nameof(SearchStringParseResult.ForAll), null, searchTexts);
+        public static SearchStringParseResult AssertRegular(this SearchStringParseResult result, params string[] searchTexts) {
+            AssertSingle(result.Regular, null, searchTexts);
+            return result;
         }
-        public static SearchStringParseResult AssertSingleInclude(this SearchStringParseResult result, params string[] searchTexts) {
-            return AssertSingle(result, nameof(SearchStringParseResult.Include), null, searchTexts);
+        public static SearchStringParseResult AssertInclude(this SearchStringParseResult result, params string[] searchTexts) {
+            AssertSingle(result.Include, null, searchTexts);
+            return result;
         }
-        public static SearchStringParseResult AssertSingleExclude(this SearchStringParseResult result, params string[] searchTexts) {
-            return AssertSingle(result, nameof(SearchStringParseResult.Exclude), null, searchTexts);
+        public static SearchStringParseResult AssertExclude(this SearchStringParseResult result, params string[] searchTexts) {
+            AssertSingle(result.Exclude, null, searchTexts);
+            return result;
         }
-        static SearchStringParseResult AssertSingle(this SearchStringParseResult result, string propName, SearchMode? searchMode, params string[] searchTexts) {
-            var collection = result.GetType().GetProperty(propName).GetValue(result) as List<SearchStringParseInfo>;
-            Assert.AreEqual(searchTexts.Length, collection.Count);
-            //Assert.AreEqual(0, result.FieldSpecific.Count);
-            for(int i = 0; i < searchTexts.Length; i++)
-                AssertParseInfo(collection[i], searchMode, searchTexts[i]);
+        public static SearchStringParseResult AssertFieldRegular(this SearchStringParseResult result, string field, params string[] searchTexts) {
+            AssertSingle(result.Regular, field, searchTexts);
+            return result;
+        }
+        public static SearchStringParseResult AssertFieldInclude(this SearchStringParseResult result, string field, params string[] searchTexts) {
+            AssertSingle(result.Include, field, searchTexts);
+            return result;
+        }
+        public static SearchStringParseResult AssertFieldExclude(this SearchStringParseResult result, string field, params string[] searchTexts) {
+            AssertSingle(result.Exclude, field, searchTexts);
             return result;
         }
 
-        //static SearchStringParseInfo AssertParseInfo(this SearchStringParseInfo info, params string[] searchTexts) {
-        //    return AssertParseInfo(info, null, searchTexts);
-        //}
-        static SearchStringParseInfo AssertParseInfo(this SearchStringParseInfo info, SearchMode? searchMode, string searchText) {
-            Assert.AreEqual(searchMode ?? SearchStringParseSettings.Default.SearchMode, info.SearchMode);
+        static void AssertSingle(List<SearchStringParseInfo> collection, string field, params string[] searchTexts) {
+            Assert.AreEqual(searchTexts.Length, collection.Count);
+            for(int i = 0; i < searchTexts.Length; i++)
+                AssertParseInfo(collection[i], field, searchTexts[i]);
+        }
+        static SearchStringParseInfo AssertParseInfo(this SearchStringParseInfo info, string field, string searchText) {
+            Assert.AreEqual(SearchStringParseSettings.Default.SearchMode, info.SearchMode);
+            Assert.AreEqual(field, info.Field);
             Assert.AreEqual(searchText, info.SearchString);
             return info;
         }

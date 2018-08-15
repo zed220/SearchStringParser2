@@ -18,12 +18,14 @@ namespace SearchStringParser {
             public PhaseMode PhaseMode;
             public bool GroupStarted;
             public bool GroupFinished;
+            public string Field;
 
             public void Flush() {
                 Phase = String.Empty;
                 PhaseMode = PhaseMode.Default;
                 GroupStarted = false;
                 GroupFinished = false;
+                Field = null;
             }
         }
 
@@ -71,6 +73,11 @@ namespace SearchStringParser {
                         BuildPhase();
                         continue;
                     }
+                    if(c == settings.SpecificFieldModificator) {
+                        state.Field = state.Phase;
+                        state.Phase = string.Empty;
+                        continue;
+                    }
                 }
                 if(state.GroupStarted) {
                     bool validGroupEnd = next_c == null || next_c == settings.PhaseSeparator;
@@ -94,13 +101,13 @@ namespace SearchStringParser {
                 switch(state.PhaseMode) {
                     case PhaseMode.Default:
                         if(state.GroupStarted)
-                            AddInfo(result.ForAll, settings.GroupModificator.ToString());
+                            AddInfo(result.Regular, settings.GroupModificator.ToString(), state.Field);
                         return;
                     case PhaseMode.Exclude:
-                        AddInfo(result.ForAll, settings.ExcludeModificator.ToString());
+                        AddInfo(result.Regular, settings.ExcludeModificator.ToString(), state.Field);
                         break;
                     case PhaseMode.Include:
-                        AddInfo(result.ForAll, settings.IncludeModificator.ToString());
+                        AddInfo(result.Regular, settings.IncludeModificator.ToString(), state.Field);
                         break;
                 }
                 return;
@@ -109,19 +116,19 @@ namespace SearchStringParser {
                 state.Phase = settings.GroupModificator + state.Phase;
             switch(state.PhaseMode) {
                 case PhaseMode.Default:
-                    AddInfo(result.ForAll, state.Phase);
+                    AddInfo(result.Regular, state.Phase, state.Field);
                     break;
                 case PhaseMode.Exclude:
-                    AddInfo(result.Exclude, state.Phase);
+                    AddInfo(result.Exclude, state.Phase, state.Field);
                     break;
                 case PhaseMode.Include:
-                    AddInfo(result.Include, state.Phase);
+                    AddInfo(result.Include, state.Phase, state.Field);
                     break;
             }
         }
 
-        void AddInfo(List<SearchStringParseInfo> target, string phase) {
-            target.Add(new SearchStringParseInfo(settings.SearchMode, phase));
+        void AddInfo(List<SearchStringParseInfo> target, string phase, string field) {
+            target.Add(new SearchStringParseInfo(phase, settings.SearchMode, field));
         }
     }
 }

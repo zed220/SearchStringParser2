@@ -11,6 +11,7 @@ namespace SearchStringParser.Tests {
         static char cExclude { get { return SearchStringParseSettings.Default.ExcludeModificator; } }
         static char cGroup { get { return SearchStringParseSettings.Default.GroupModificator; } }
         static char cSpace { get { return SearchStringParseSettings.Default.PhaseSeparator; } }
+        static char cSpecificField { get { return SearchStringParseSettings.Default.SpecificFieldModificator; } }
 
         static SearchStringParseResult Parse(string text, SearchStringParseSettings settings = null) {
             return SearchStringParser.Parse(text, settings ?? SearchStringParseSettings.Default);
@@ -24,70 +25,74 @@ namespace SearchStringParser.Tests {
         static string Group(string searchString) {
             return cGroup + searchString + cGroup;
         }
+        static string SpecificField(string field, string searchString) {
+            return field + cSpecificField + searchString;
+        }
 
         [Test]
         public void DefaultSettings() {
-            Assert.AreEqual(5, typeof(SearchStringParseSettings).GetProperties(BindingFlags.Public | BindingFlags.Instance).Length);
+            Assert.AreEqual(6, typeof(SearchStringParseSettings).GetProperties(BindingFlags.Public | BindingFlags.Instance).Length);
             Assert.AreEqual(SearchMode.Like, SearchStringParseSettings.Default.SearchMode);
             Assert.AreEqual(' ', SearchStringParseSettings.Default.PhaseSeparator);
             Assert.AreEqual('+', SearchStringParseSettings.Default.IncludeModificator);
             Assert.AreEqual('-', SearchStringParseSettings.Default.ExcludeModificator);
             Assert.AreEqual('"', SearchStringParseSettings.Default.GroupModificator);
+            Assert.AreEqual(':', SearchStringParseSettings.Default.SpecificFieldModificator);
         }
         [Test]
         public void BoundaryValues_Elemental() {
-            Parse(null).AssertSingleForAll().AssertSingleInclude().AssertSingleExclude();
-            Parse("").AssertSingleForAll().AssertSingleInclude().AssertSingleExclude();
-            Parse(cSpace.ToString()).AssertSingleForAll().AssertSingleInclude().AssertSingleExclude();
-            Parse(cSpace.ToString() + cSpace.ToString()).AssertSingleForAll().AssertSingleInclude().AssertSingleExclude();
+            Parse(null).AssertRegular().AssertInclude().AssertExclude();
+            Parse("").AssertRegular().AssertInclude().AssertExclude();
+            Parse(cSpace.ToString()).AssertRegular().AssertInclude().AssertExclude();
+            Parse(cSpace.ToString() + cSpace.ToString()).AssertRegular().AssertInclude().AssertExclude();
         }
         [Test]
         public void SimpleParsing() {
-            Parse("a").AssertSingleForAll("a").AssertSingleInclude().AssertSingleExclude();
-            Parse("ab").AssertSingleForAll("ab").AssertSingleInclude().AssertSingleExclude();
-            Parse("a ").AssertSingleForAll("a").AssertSingleInclude().AssertSingleExclude();
-            Parse(" a").AssertSingleForAll("a").AssertSingleInclude().AssertSingleExclude();
-            Parse(" a ").AssertSingleForAll("a").AssertSingleInclude().AssertSingleExclude();
-            Parse("a b").AssertSingleForAll("a", "b").AssertSingleInclude().AssertSingleExclude();
-            Parse("a b c").AssertSingleForAll("a", "b", "c").AssertSingleInclude().AssertSingleExclude();
+            Parse("a").AssertRegular("a").AssertInclude().AssertExclude();
+            Parse("ab").AssertRegular("ab").AssertInclude().AssertExclude();
+            Parse("a ").AssertRegular("a").AssertInclude().AssertExclude();
+            Parse(" a").AssertRegular("a").AssertInclude().AssertExclude();
+            Parse(" a ").AssertRegular("a").AssertInclude().AssertExclude();
+            Parse("a b").AssertRegular("a", "b").AssertInclude().AssertExclude();
+            Parse("a b c").AssertRegular("a", "b", "c").AssertInclude().AssertExclude();
         }
         [Test]
         public void ModificatorInclude() {
-            Parse(Include("a")).AssertSingleForAll().AssertSingleInclude("a").AssertSingleExclude();
-            Parse(Include("ab")).AssertSingleForAll().AssertSingleInclude("ab").AssertSingleExclude();
-            Parse(Include("ab c")).AssertSingleForAll("c").AssertSingleInclude("ab").AssertSingleExclude();
-            Parse("ab " + Include("c")).AssertSingleForAll("ab").AssertSingleInclude("c").AssertSingleExclude();
-            Parse(Include("a") + " " + Include("b")).AssertSingleForAll().AssertSingleInclude("a", "b").AssertSingleExclude();
+            Parse(Include("a")).AssertRegular().AssertInclude("a").AssertExclude();
+            Parse(Include("ab")).AssertRegular().AssertInclude("ab").AssertExclude();
+            Parse(Include("ab c")).AssertRegular("c").AssertInclude("ab").AssertExclude();
+            Parse("ab " + Include("c")).AssertRegular("ab").AssertInclude("c").AssertExclude();
+            Parse(Include("a") + " " + Include("b")).AssertRegular().AssertInclude("a", "b").AssertExclude();
         }
         [Test]
         public void ModificatorExclude() {
-            Parse(Exclude("a")).AssertSingleForAll().AssertSingleExclude("a").AssertSingleInclude();
-            Parse(Exclude("ab")).AssertSingleForAll().AssertSingleExclude("ab").AssertSingleInclude();
-            Parse(Exclude("ab c")).AssertSingleForAll("c").AssertSingleExclude("ab").AssertSingleInclude();
-            Parse("ab " + Exclude("c")).AssertSingleForAll("ab").AssertSingleExclude("c").AssertSingleInclude();
-            Parse(Exclude("a") + " " + Exclude("b")).AssertSingleForAll().AssertSingleExclude("a", "b").AssertSingleInclude();
+            Parse(Exclude("a")).AssertRegular().AssertExclude("a").AssertInclude();
+            Parse(Exclude("ab")).AssertRegular().AssertExclude("ab").AssertInclude();
+            Parse(Exclude("ab c")).AssertRegular("c").AssertExclude("ab").AssertInclude();
+            Parse("ab " + Exclude("c")).AssertRegular("ab").AssertExclude("c").AssertInclude();
+            Parse(Exclude("a") + " " + Exclude("b")).AssertRegular().AssertExclude("a", "b").AssertInclude();
         }
         [Test]
         public void ModificatorIncludeExclude() {
-            Parse(Exclude("a") + " " + Include("b")).AssertSingleForAll().AssertSingleExclude("a").AssertSingleInclude("b");
-            Parse(Exclude("b") + " " + Include("a")).AssertSingleForAll().AssertSingleExclude("b").AssertSingleInclude("a");
-            Parse(Exclude("a") + " c " + Include("b")).AssertSingleForAll("c").AssertSingleExclude("a").AssertSingleInclude("b");
-            Parse(Exclude("b") + " c " + Include("a")).AssertSingleForAll("c").AssertSingleExclude("b").AssertSingleInclude("a");
+            Parse(Exclude("a") + " " + Include("b")).AssertRegular().AssertExclude("a").AssertInclude("b");
+            Parse(Exclude("b") + " " + Include("a")).AssertRegular().AssertExclude("b").AssertInclude("a");
+            Parse(Exclude("a") + " c " + Include("b")).AssertRegular("c").AssertExclude("a").AssertInclude("b");
+            Parse(Exclude("b") + " c " + Include("a")).AssertRegular("c").AssertExclude("b").AssertInclude("a");
         }
         [Test]
         public void ModificatorGroup() {
-            Parse(Group("a")).AssertSingleForAll("a").AssertSingleInclude().AssertSingleExclude();
-            Parse(Group("a b")).AssertSingleForAll("a b").AssertSingleInclude().AssertSingleExclude();
-            Parse(Include(Group("a"))).AssertSingleForAll().AssertSingleInclude("a").AssertSingleExclude();
-            Parse(Exclude(Group("a"))).AssertSingleForAll().AssertSingleInclude().AssertSingleExclude("a");
-            Parse(Group(Include("a"))).AssertSingleForAll(Include("a")).AssertSingleInclude().AssertSingleExclude();
-            Parse(Group(Exclude("a"))).AssertSingleForAll(Exclude("a")).AssertSingleInclude().AssertSingleExclude();
+            Parse(Group("a")).AssertRegular("a").AssertInclude().AssertExclude();
+            Parse(Group("a b")).AssertRegular("a b").AssertInclude().AssertExclude();
+            Parse(Include(Group("a"))).AssertRegular().AssertInclude("a").AssertExclude();
+            Parse(Exclude(Group("a"))).AssertRegular().AssertInclude().AssertExclude("a");
+            Parse(Group(Include("a"))).AssertRegular(Include("a")).AssertInclude().AssertExclude();
+            Parse(Group(Exclude("a"))).AssertRegular(Exclude("a")).AssertInclude().AssertExclude();
         }
         [Test]
         public void BoundaryValues_Constants() {
             Action<char> assert = c => {
-                Parse(c.ToString()).AssertSingleForAll(c.ToString()).AssertSingleInclude().AssertSingleExclude();
-                Parse(c.ToString() + c.ToString()).AssertSingleForAll(c.ToString()).AssertSingleInclude().AssertSingleExclude();
+                Parse(c.ToString()).AssertRegular(c.ToString()).AssertInclude().AssertExclude();
+                Parse(c.ToString() + c.ToString()).AssertRegular(c.ToString()).AssertInclude().AssertExclude();
             };
             assert(cExclude);
             assert(cInclude);
@@ -95,12 +100,16 @@ namespace SearchStringParser.Tests {
         }
         [Test]
         public void UnfinishedGroup() {
-            Parse(cGroup + "a").AssertSingleForAll(cGroup + "a").AssertSingleInclude().AssertSingleExclude();
-            Parse("a" + cGroup).AssertSingleForAll("a" + cGroup).AssertSingleInclude().AssertSingleExclude();
+            Parse(cGroup + "a").AssertRegular(cGroup + "a").AssertInclude().AssertExclude();
+            Parse("a" + cGroup).AssertRegular("a" + cGroup).AssertInclude().AssertExclude();
         }
         [Test]
         public void IgnoreGrouping() {
-            Parse(cGroup.ToString() + cGroup + cGroup).AssertSingleForAll(cGroup.ToString()).AssertSingleInclude().AssertSingleExclude();
+            Parse(cGroup.ToString() + cGroup + cGroup).AssertRegular(cGroup.ToString()).AssertInclude().AssertExclude();
+        }
+        [Test]
+        public void SpecField() {
+            Parse(SpecificField("f", "a")).AssertFieldRegular("f", "a").AssertInclude().AssertExclude();
         }
     }
 }
