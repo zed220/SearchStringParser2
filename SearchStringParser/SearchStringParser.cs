@@ -68,10 +68,12 @@ namespace SearchStringParser {
                         continue;
                     }
                 }
-                if(c == settings.GroupModificator) {
-                    state.Group = false;
-                    BuildPhase();
-                    continue;
+                if(state.Group) {
+                    if(c == settings.GroupModificator) {
+                        state.Group = false;
+                        BuildPhase();
+                        continue;
+                    }
                 }
                 state.Phase += c;
             }
