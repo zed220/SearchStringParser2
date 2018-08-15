@@ -6,21 +6,9 @@ using System.Threading.Tasks;
 
 namespace SearchStringParser {
     public class SearchStringParser {
-        readonly SearchStringParseSettings settings;
-        readonly SearchStringParseResult result = new SearchStringParseResult();
-
-        SearchStringParser(SearchStringParseSettings settings) {
-            this.settings = settings;
-        }
-
-        public static SearchStringParseResult Parse(string text, SearchStringParseSettings settings) {
-            var parser = new SearchStringParser(settings);
-            parser.ParseString(text);
-            return parser.result;
-        }
+        #region Inners
 
         enum PhaseMode { Default, Exclude, Include }
-
         class ParsingState {
             public ParsingState() {
                 Flush();
@@ -37,10 +25,26 @@ namespace SearchStringParser {
             }
         }
 
+        #endregion
+
+        readonly SearchStringParseSettings settings;
+        readonly SearchStringParseResult result = new SearchStringParseResult();
+
+        ParsingState state = new ParsingState();
+
+        SearchStringParser(SearchStringParseSettings settings) {
+            this.settings = settings;
+        }
+
+        public static SearchStringParseResult Parse(string text, SearchStringParseSettings settings) {
+            if(String.IsNullOrWhiteSpace(text))
+                return new SearchStringParseResult();
+            var parser = new SearchStringParser(settings);
+            parser.ParseString(text);
+            return parser.result;
+        }
+
         void ParseString(string searchText) {
-            if(searchText == null)
-                return;
-            ParsingState state = new ParsingState();
             foreach(char c in searchText) {
                 if(state.Phase == string.Empty) {
                     if(c == settings.GroupModificator) {
@@ -60,24 +64,25 @@ namespace SearchStringParser {
                 }
                 if(!state.Group) {
                     if(c == settings.PhaseSeparator) {
-                        BuildPhase(state);
+                        BuildPhase();
                         continue;
                     }
                 }
                 if(c == settings.GroupModificator) {
-                    BuildPhase(state);
+                    state.Group = false;
+                    BuildPhase();
                     continue;
                 }
                 state.Phase += c;
             }
-            BuildPhase(state);
+            BuildPhase();
         }
 
-        void BuildPhase(ParsingState state) {
-            BuildPhaseCore(state);
+        void BuildPhase() {
+            BuildPhaseCore();
             state.Flush();
         }
-        void BuildPhaseCore(ParsingState state) {
+        void BuildPhaseCore() {
             if(state.Phase == string.Empty) {
                 switch(state.PhaseMode) {
                     case PhaseMode.Default:
@@ -93,6 +98,8 @@ namespace SearchStringParser {
                 }
                 return;
             }
+            if(state.Group)
+                state.Phase = settings.GroupModificator + state.Phase;
             switch(state.PhaseMode) {
                 case PhaseMode.Default:
                     AddInfo(result.ForAll, state.Phase);

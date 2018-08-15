@@ -92,5 +92,10 @@ namespace SearchStringParser.Tests {
             assert(cInclude);
             assert(cGroup);
         }
+        [Test]
+        public void UnfinishedGroup() {
+            Parse(cGroup + "a").AssertSingleForAll(cGroup + "a").AssertSingleInclude().AssertSingleExclude();
+            Parse("a" + cGroup).AssertSingleForAll("a" + cGroup).AssertSingleInclude().AssertSingleExclude();
+        }
     }
 }
