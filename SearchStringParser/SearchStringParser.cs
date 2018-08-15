@@ -30,6 +30,10 @@ namespace SearchStringParser {
                 AddInfo(result.Include, phase.Remove(0, settings.IncludeModificator.Length));
                 return;
             }
+            if(phase.StartsWith(settings.ExcludeModificator)) {
+                AddInfo(result.Exclude, phase.Remove(0, settings.ExcludeModificator.Length));
+                return;
+            }
             AddInfo(result.ForAll, phase);
         }
 

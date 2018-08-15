@@ -4,8 +4,6 @@ using System.Linq;
 
 namespace SearchStringParser.Tests {
     public static class ParseTestsExtensions {
-        const string Exclude = nameof(SearchStringParseResult.Exclude);
-
         public static SearchStringParseResult AssertSingleForAll(this SearchStringParseResult result, params string[] searchTexts) {
             return AssertSingle(result, nameof(SearchStringParseResult.ForAll), null, searchTexts);
         }
