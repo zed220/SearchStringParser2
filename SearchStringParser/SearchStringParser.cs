@@ -49,12 +49,16 @@ namespace SearchStringParser {
         }
 
         void ParseString(string searchText) {
+            ParseString(searchText, true);
+        }
+
+        void ParseString(string searchText, bool ckeckGroup) {
             for(int i = 0; i < searchText.Length; i++) {
                 char c = searchText[i];
                 char? next_c = i < searchText.Length - 1 ? (char?)searchText[i + 1] : null;
                 if(state.Phase == string.Empty) {
                     if(!state.GroupStarted) {
-                        if(c == settings.GroupModificator) {
+                        if(ckeckGroup && c == settings.GroupModificator) {
                             state.GroupStarted = true;
                             continue;
                         }
@@ -90,6 +94,11 @@ namespace SearchStringParser {
                     }
                 }
                 state.Phase += c;
+            }
+            if(state.GroupStarted) {
+                state.Flush();
+                ParseString(searchText, false);
+                return;
             }
             BuildPhase();
         }
