@@ -30,6 +30,7 @@ namespace SearchStringParser.Tests {
         }
 
         static void AssertSingle(List<SearchStringParseInfo> collection, string field, params string[] searchTexts) {
+            collection = collection.Where(c => c.Field == field).ToList();
             Assert.AreEqual(searchTexts.Length, collection.Count);
             for(int i = 0; i < searchTexts.Length; i++)
                 AssertParseInfo(collection[i], field, searchTexts[i]);

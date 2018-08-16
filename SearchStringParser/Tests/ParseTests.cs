@@ -28,6 +28,9 @@ namespace SearchStringParser.Tests {
         static string SpecificField(string field, string searchString) {
             return field + cSpecificField + searchString;
         }
+        static string MakeSearchString(params string[] texts) {
+            return string.Join(cSpace.ToString(), texts);
+        }
 
         [Test]
         public void DefaultSettings() {
@@ -53,8 +56,8 @@ namespace SearchStringParser.Tests {
             Parse("a ").AssertRegular("a").AssertInclude().AssertExclude();
             Parse(" a").AssertRegular("a").AssertInclude().AssertExclude();
             Parse(" a ").AssertRegular("a").AssertInclude().AssertExclude();
-            Parse("a b").AssertRegular("a", "b").AssertInclude().AssertExclude();
-            Parse("a b c").AssertRegular("a", "b", "c").AssertInclude().AssertExclude();
+            Parse(MakeSearchString("a", "b")).AssertRegular("a", "b").AssertInclude().AssertExclude();
+            Parse(MakeSearchString("a", "b", "c")).AssertRegular("a", "b", "c").AssertInclude().AssertExclude();
         }
         [Test]
         public void ModificatorInclude() {
@@ -119,6 +122,19 @@ namespace SearchStringParser.Tests {
         [Test]
         public void SpecField() {
             Parse(SpecificField("f", "a")).AssertFieldRegular("f", "a").AssertInclude().AssertExclude();
+            Parse(Group(SpecificField("a", "b"))).AssertRegular(SpecificField("a", "b")).AssertInclude().AssertExclude();
+            Parse(Include(Group(SpecificField("a", "b")))).AssertRegular().AssertInclude(SpecificField("a", "b")).AssertExclude();
+            Parse(Group(Include(SpecificField("a", "b")))).AssertRegular(Include(SpecificField("a", "b"))).AssertInclude().AssertExclude();
+            Parse(Include(SpecificField("f", "a"))).AssertRegular().AssertFieldInclude("f", "a").AssertExclude();
+            Parse(Exclude(SpecificField("f", "a"))).AssertRegular().AssertFieldExclude("f", "a").AssertInclude();
+            Parse(SpecificField("f", String.Empty)).AssertRegular(SpecificField("f", String.Empty)).AssertInclude().AssertExclude();
+            Parse(Include(SpecificField("f", String.Empty))).AssertRegular().AssertInclude(SpecificField("f", String.Empty)).AssertExclude();
+            Parse(Exclude(SpecificField("f", String.Empty))).AssertRegular().AssertExclude(SpecificField("f", String.Empty)).AssertInclude();
+        }
+        [Test]
+        public void RealCase1() {
+            string s = MakeSearchString("regular", Include("plus"), Exclude("minus"), SpecificField("field", "someInField"));
+            Parse(s).AssertRegular("regular").AssertExclude("minus").AssertInclude("plus").AssertFieldRegular("field", "someInField");
         }
     }
 }
