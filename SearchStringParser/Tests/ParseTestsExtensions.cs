@@ -36,7 +36,6 @@ namespace SearchStringParser.Tests {
                 AssertParseInfo(collection[i], field, searchTexts[i]);
         }
         static SearchStringParseInfo AssertParseInfo(this SearchStringParseInfo info, string field, string searchText) {
-            Assert.AreEqual(SearchStringParseSettings.Default.SearchMode, info.SearchMode);
             Assert.AreEqual(field, info.Field);
             Assert.AreEqual(searchText, info.SearchString);
             return info;

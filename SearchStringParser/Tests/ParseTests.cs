@@ -34,8 +34,7 @@ namespace SearchStringParser.Tests {
 
         [Test]
         public void DefaultSettings() {
-            Assert.AreEqual(6, typeof(SearchStringParseSettings).GetProperties(BindingFlags.Public | BindingFlags.Instance).Length);
-            Assert.AreEqual(SearchMode.Like, SearchStringParseSettings.Default.SearchMode);
+            Assert.AreEqual(5, typeof(SearchStringParseSettings).GetProperties(BindingFlags.Public | BindingFlags.Instance).Length);
             Assert.AreEqual(' ', SearchStringParseSettings.Default.PhaseSeparator);
             Assert.AreEqual('+', SearchStringParseSettings.Default.IncludeModificator);
             Assert.AreEqual('-', SearchStringParseSettings.Default.ExcludeModificator);

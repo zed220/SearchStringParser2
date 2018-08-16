@@ -136,7 +136,7 @@ namespace SearchStringParser {
         }
 
         void AddInfo(List<SearchStringParseInfo> target, string phase, string field) {
-            target.Add(new SearchStringParseInfo(phase, settings.SearchMode, field));
+            target.Add(new SearchStringParseInfo(phase, field));
         }
     }
 }
