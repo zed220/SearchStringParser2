@@ -31,6 +31,15 @@ namespace SearchStringParser.Tests {
         static PhaseInfo ExcludePh(string searchString) {
             return new PhaseInfo(Exclude(searchString), SearchModificator.Exclude);
         }
+        static PhaseInfo[] SpecificFieldPh(string field, string phase) {
+            return new[] { new PhaseInfo(field, SearchModificator.Field), new PhaseInfo(cSpecificField.ToString(), SearchModificator.None), new PhaseInfo(phase) };
+        }
+        static PhaseInfo[] SpecificFieldIncPh(string field, string phase) {
+            return new[] { new PhaseInfo(cInclude.ToString(), SearchModificator.Include), new PhaseInfo(field, SearchModificator.Field), new PhaseInfo(cSpecificField.ToString(), SearchModificator.None), new PhaseInfo(phase, SearchModificator.Include) };
+        }
+        static PhaseInfo[] SpecificFieldExclPh(string field, string phase) {
+            return new[] { new PhaseInfo(cExclude.ToString(), SearchModificator.Exclude), new PhaseInfo(field, SearchModificator.Field), new PhaseInfo(cSpecificField.ToString(), SearchModificator.None), new PhaseInfo(phase, SearchModificator.Exclude) };
+        }
         static string Group(string searchString) {
             return cGroup + searchString + cGroup;
         }
@@ -172,20 +181,36 @@ namespace SearchStringParser.Tests {
         }
         [Test]
         public void UnfinishedGroup() {
-            Parse(cGroup + "a").AssertRegular(cGroup + "a").AssertInclude().AssertExclude();
-            Parse("a" + cGroup).AssertRegular("a" + cGroup).AssertInclude().AssertExclude();
-            Parse(cGroup + MakeSearchString("a", "b")).AssertRegular(cGroup + "a", "b").AssertInclude().AssertExclude();
-            Parse(Include(cGroup + MakeSearchString("a", "b"))).AssertRegular("b").AssertInclude(cGroup + "a").AssertExclude();
-            Parse(Include(cGroup + MakeSearchString("a", Exclude("b")))).AssertRegular().AssertInclude(cGroup + "a").AssertExclude("b");
-            Parse(MakeSearchString("a", cGroup + "b")).AssertRegular("a", cGroup + "b").AssertInclude().AssertExclude();
+            Parse(cGroup + "a").
+                AssertRegular(cGroup + "a").AssertInclude().AssertExclude().
+                AssertPhases(cGroup + "a");
+            Parse("a" + cGroup).
+                AssertRegular("a" + cGroup).AssertInclude().AssertExclude().
+                AssertPhases("a" + cGroup);
+            Parse(cGroup + MakeSearchString("a", "b")).
+                AssertRegular(cGroup + "a", "b").AssertInclude().AssertExclude().
+                AssertPhases(cGroup + "a" + cSpace, "b");
+            Parse(Include(cGroup + MakeSearchString("a", "b"))).
+                AssertRegular("b").AssertInclude(cGroup + "a").AssertExclude().
+                AssertPhases(IncludePh(cGroup.ToString() + "a" + cSpace), Phase("b"));
+            Parse(Include(cGroup + MakeSearchString("a", Exclude("b")))).
+                AssertRegular().AssertInclude(cGroup + "a").AssertExclude("b").
+                AssertPhases(IncludePh(cGroup + "a" + cSpace), ExcludePh("b"));
+            Parse(MakeSearchString("a", cGroup + "b")).
+                AssertRegular("a", cGroup + "b").AssertInclude().AssertExclude().
+                AssertPhases("a" + cSpace, cGroup + "b");
         }
         [Test]
         public void IgnoreGrouping() {
-            Parse(cGroup.ToString() + cGroup + cGroup).AssertRegular(cGroup.ToString()).AssertInclude().AssertExclude();
+            Parse(cGroup.ToString() + cGroup + cGroup).
+                AssertRegular(cGroup.ToString()).AssertInclude().AssertExclude().
+                AssertPhases(cGroup.ToString() + cGroup + cGroup);
         }
         [Test]
         public void SpecField() {
-            Parse(SpecificField("f", "a")).AssertFieldRegular("f", "a").AssertInclude().AssertExclude();
+            Parse(SpecificField("f", "a")).
+                AssertFieldRegular("f", "a").AssertInclude().AssertExclude().
+                AssertPhases(SpecificFieldPh("f", "a"));
             Parse(Group(SpecificField("a", "b"))).AssertRegular(SpecificField("a", "b")).AssertInclude().AssertExclude();
             Parse(Include(Group(SpecificField("a", "b")))).AssertRegular().AssertInclude(SpecificField("a", "b")).AssertExclude();
             Parse(Group(Include(SpecificField("a", "b")))).AssertRegular(Include(SpecificField("a", "b"))).AssertInclude().AssertExclude();
