@@ -123,16 +123,28 @@ namespace SearchStringParser.Tests {
             Parse(Group("a")).
                 AssertRegular("a").AssertInclude().AssertExclude().
                 AssertPhases(Group("a"));
-            Parse(Group("a b")).AssertRegular("a b").AssertInclude().AssertExclude();
-            Parse(Include(Group("a"))).AssertRegular().AssertInclude("a").AssertExclude();
-            Parse(Exclude(Group("a"))).AssertRegular().AssertInclude().AssertExclude("a");
-            Parse(Group(Include("a"))).AssertRegular(Include("a")).AssertInclude().AssertExclude();
-            Parse(Group(Exclude("a"))).AssertRegular(Exclude("a")).AssertInclude().AssertExclude();
+            Parse(Group("a b")).
+                AssertRegular("a b").AssertInclude().AssertExclude().
+                AssertPhases(Group("a b"));
+            Parse(Include(Group("a"))).
+                AssertRegular().AssertInclude("a").AssertExclude().
+                AssertPhases(IncludePh(Group("a")));
+            Parse(Exclude(Group("a"))).
+                AssertRegular().AssertInclude().AssertExclude("a").
+                AssertPhases(ExcludePh(Group("a")));
+            Parse(Group(Include("a"))).
+                AssertRegular(Include("a")).AssertInclude().AssertExclude().
+                AssertPhases(Group(Include("a")));
+            Parse(Group(Exclude("a"))).
+                AssertRegular(Exclude("a")).AssertInclude().AssertExclude().
+                AssertPhases(Group(Exclude("a")));
         }
         [Test]
         public void BoundaryValues_Constants() {
             Action<char> assert = c => {
-                Parse(c.ToString()).AssertRegular(c.ToString()).AssertInclude().AssertExclude();
+                Parse(c.ToString()).
+                AssertRegular(c.ToString()).AssertInclude().AssertExclude().
+                AssertPhases(c.ToString());
             };
             assert(cExclude);
             assert(cInclude);
@@ -142,11 +154,21 @@ namespace SearchStringParser.Tests {
         [Test]
         public void BoundaryValues_DoubleConstants() {
             Func<char, string> makeDouble = c => c.ToString() + c;
-            Parse(makeDouble(cInclude)).AssertRegular().AssertInclude(cInclude.ToString()).AssertExclude();
-            Parse(makeDouble(cExclude)).AssertRegular().AssertInclude().AssertExclude(cExclude.ToString());
-            Parse(makeDouble(cGroup)).AssertRegular(cGroup.ToString()).AssertInclude().AssertExclude();
-            Parse(makeDouble(cGroup) + cGroup).AssertRegular(cGroup.ToString()).AssertInclude().AssertExclude();
-            Parse(makeDouble(cSpecificField)).AssertRegular(makeDouble(cSpecificField)).AssertInclude().AssertExclude();
+            Parse(makeDouble(cInclude)).
+                AssertRegular().AssertInclude(Include(String.Empty)).AssertExclude().
+                AssertPhases(IncludePh(cInclude.ToString()));
+            Parse(makeDouble(cExclude)).
+                AssertRegular().AssertInclude().AssertExclude(Exclude(String.Empty)).
+                AssertPhases(ExcludePh(cExclude.ToString()));
+            Parse(makeDouble(cGroup)).
+                AssertRegular(cGroup.ToString()).AssertInclude().AssertExclude().
+                AssertPhases(cGroup.ToString() + cGroup);
+            Parse(makeDouble(cGroup) + cGroup).
+                AssertRegular(cGroup.ToString()).AssertInclude().AssertExclude().
+                AssertPhases(makeDouble(cGroup) + cGroup);
+            Parse(makeDouble(cSpecificField)).
+                AssertRegular(makeDouble(cSpecificField)).AssertInclude().AssertExclude().
+                AssertPhases(makeDouble(cSpecificField));
         }
         [Test]
         public void UnfinishedGroup() {

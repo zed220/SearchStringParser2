@@ -67,26 +67,29 @@ namespace SearchStringParser {
                 }
                 if(GroupStarted && !GroupFinished)
                     Phase = settings.GroupModificator + Phase;
-                if(String.IsNullOrEmpty(Phase)) {
-                    if(addSeparator)
-                        PhaseInfos.Add(new PhaseInfo(settings.PhaseSeparator.ToString()));
-                    return;
-                }
                 string phaseStr = String.Empty;
                 SearchModificator modificator = SearchModificator.None;
                 switch(PhaseMode) {
                     case PhaseMode.Exclude:
                         phaseStr += settings.ExcludeModificator;
-                        modificator = SearchModificator.Exclude;
+                        if(Phase != string.Empty)
+                            modificator = SearchModificator.Exclude;
                         break;
                     case PhaseMode.Include:
                         phaseStr += settings.IncludeModificator;
-                        modificator = SearchModificator.Include;
+                        if(Phase != string.Empty)
+                            modificator = SearchModificator.Include;
                         break;
                 }
+                if(GroupStarted && GroupFinished)
+                    phaseStr += settings.GroupModificator;
                 phaseStr += Phase;
+                if(GroupFinished)
+                    phaseStr += settings.GroupModificator;
                 if(addSeparator)
                     phaseStr += settings.PhaseSeparator;
+                if(phaseStr == string.Empty)
+                    return;
                 PhaseInfos.Add(new PhaseInfo(phaseStr, modificator));
             }
 
