@@ -48,13 +48,13 @@ namespace SearchStringParser.Tests {
         public void BoundaryValues_Elemental() {
             Parse(null).AssertRegular().AssertInclude().AssertExclude().AssertPhases();
             Parse("").AssertRegular().AssertInclude().AssertExclude().AssertPhases();
-            Parse(cSpace.ToString()).AssertRegular().AssertInclude().AssertExclude().AssertPhases(CreatePhase(" "));
-            Parse(cSpace.ToString() + cSpace.ToString()).AssertRegular().AssertInclude().AssertExclude().AssertPhases(CreatePhase("  "));
+            Parse(cSpace.ToString()).AssertRegular().AssertInclude().AssertExclude().AssertPhases(" ");
+            Parse(cSpace.ToString() + cSpace.ToString()).AssertRegular().AssertInclude().AssertExclude().AssertPhases("  ");
         }
         [Test]
         public void SimpleParsing() {
-            Parse("a").AssertRegular("a").AssertInclude().AssertExclude();
-            Parse("ab").AssertRegular("ab").AssertInclude().AssertExclude();
+            Parse("a").AssertRegular("a").AssertInclude().AssertExclude().AssertPhases("a");
+            Parse("ab").AssertRegular("ab").AssertInclude().AssertExclude().AssertPhases("ab");
             Parse("a ").AssertRegular("a").AssertInclude().AssertExclude();
             Parse(" a").AssertRegular("a").AssertInclude().AssertExclude();
             Parse(" a ").AssertRegular("a").AssertInclude().AssertExclude();

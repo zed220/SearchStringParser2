@@ -82,8 +82,13 @@ namespace SearchStringParser {
         }
 
         public static SearchStringParseResult Parse(string text, SearchStringParseSettings settings) {
-            if(String.IsNullOrWhiteSpace(text))
+            if(String.IsNullOrEmpty(text))
                 return new SearchStringParseResult();
+            if(String.IsNullOrWhiteSpace(text)) {
+                var result = new SearchStringParseResult();
+                result.PhaseInfos.Add(new PhaseInfo(text));
+                return result;
+            }
             var parser = new SearchStringParser(settings);
             parser.ParseString(text);
             return parser.result;
