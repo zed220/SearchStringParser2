@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.27703.2047
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SearchStringParser", "SearchStringParser\SearchStringParser.csproj", "{8A3B56CB-2223-475D-B336-D092441C46C4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SearchStringParser.Tests", "SearchStringParser.Tests\SearchStringParser.Tests.csproj", "{D25C757C-E4A4-433B-BEE7-7B0BA3FD99EF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{8A3B56CB-2223-475D-B336-D092441C46C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8A3B56CB-2223-475D-B336-D092441C46C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8A3B56CB-2223-475D-B336-D092441C46C4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D25C757C-E4A4-433B-BEE7-7B0BA3FD99EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D25C757C-E4A4-433B-BEE7-7B0BA3FD99EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D25C757C-E4A4-433B-BEE7-7B0BA3FD99EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D25C757C-E4A4-433B-BEE7-7B0BA3FD99EF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

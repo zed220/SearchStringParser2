@@ -31,6 +31,9 @@ namespace SearchStringParser.Tests {
         static string MakeSearchString(params string[] texts) {
             return string.Join(cSpace.ToString(), texts);
         }
+        static PhaseInfo CreatePhase(string text, SearchModificator modificator = SearchModificator.None) {
+            return new PhaseInfo(text, modificator);
+        }
 
         [Test]
         public void DefaultSettings() {
@@ -43,10 +46,10 @@ namespace SearchStringParser.Tests {
         }
         [Test]
         public void BoundaryValues_Elemental() {
-            Parse(null).AssertRegular().AssertInclude().AssertExclude();
-            Parse("").AssertRegular().AssertInclude().AssertExclude();
-            Parse(cSpace.ToString()).AssertRegular().AssertInclude().AssertExclude();
-            Parse(cSpace.ToString() + cSpace.ToString()).AssertRegular().AssertInclude().AssertExclude();
+            Parse(null).AssertRegular().AssertInclude().AssertExclude().AssertPhases();
+            Parse("").AssertRegular().AssertInclude().AssertExclude().AssertPhases();
+            Parse(cSpace.ToString()).AssertRegular().AssertInclude().AssertExclude().AssertPhases(CreatePhase(" "));
+            Parse(cSpace.ToString() + cSpace.ToString()).AssertRegular().AssertInclude().AssertExclude().AssertPhases(CreatePhase("  "));
         }
         [Test]
         public void SimpleParsing() {
@@ -107,7 +110,7 @@ namespace SearchStringParser.Tests {
             Parse(makeDouble(cExclude)).AssertRegular().AssertInclude().AssertExclude(cExclude.ToString());
             Parse(makeDouble(cGroup)).AssertRegular(cGroup.ToString()).AssertInclude().AssertExclude();
             Parse(makeDouble(cGroup) + cGroup).AssertRegular(cGroup.ToString()).AssertInclude().AssertExclude();
-            Parse(makeDouble(cSpecificField)).AssertRegular(cSpecificField.ToString()).AssertInclude().AssertExclude();
+            Parse(makeDouble(cSpecificField)).AssertRegular(makeDouble(cSpecificField)).AssertInclude().AssertExclude();
         }
         [Test]
         public void UnfinishedGroup() {
@@ -116,6 +119,7 @@ namespace SearchStringParser.Tests {
             Parse(cGroup + MakeSearchString("a", "b")).AssertRegular(cGroup + "a", "b").AssertInclude().AssertExclude();
             Parse(Include(cGroup + MakeSearchString("a", "b"))).AssertRegular("b").AssertInclude(cGroup + "a").AssertExclude();
             Parse(Include(cGroup + MakeSearchString("a", Exclude("b")))).AssertRegular().AssertInclude(cGroup + "a").AssertExclude("b");
+            Parse(MakeSearchString("a", cGroup + "b")).AssertRegular("a", cGroup + "b").AssertInclude().AssertExclude();
         }
         [Test]
         public void IgnoreGrouping() {

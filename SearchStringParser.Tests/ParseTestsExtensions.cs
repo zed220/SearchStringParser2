@@ -4,6 +4,10 @@ using System.Linq;
 
 namespace SearchStringParser.Tests {
     public static class ParseTestsExtensions {
+        public static SearchStringParseResult AssertPhases(this SearchStringParseResult result, params PhaseInfo[] expected) {
+            CollectionAssert.AreEquivalent(expected ?? new PhaseInfo[0], result.PhaseInfos);
+            return result;
+        }
         public static SearchStringParseResult AssertRegular(this SearchStringParseResult result, params string[] searchTexts) {
             AssertSingle(result.Regular, null, searchTexts);
             return result;
