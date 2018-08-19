@@ -61,11 +61,9 @@ namespace SearchStringParser {
                 Phase = String.Empty;
             }
             public void Build(SearchStringParseSettings settings, bool addSeparator) {
-                if(Phase == string.Empty) {
-                    if(Field != null) {
-                        Phase = Field + settings.SpecificFieldModificator;
-                        Field = null;
-                    }
+                if(Phase == string.Empty && Field != null) {
+                    Phase = Field + settings.SpecificFieldModificator;
+                    Field = null;
                 }
                 if(GroupStarted && !GroupFinished)
                     Phase = settings.GroupModificator + Phase;
@@ -91,17 +89,7 @@ namespace SearchStringParser {
                     phaseStr = string.Empty;
                 }
                 if(GroupStarted && GroupFinished) {
-                    if(phaseStr != String.Empty)
-                        PhaseInfos.Add(new PhaseInfo(phaseStr, modificator));
-                    if(Phase != String.Empty) {
-                        PhaseInfos.Add(new PhaseInfo(settings.GroupModificator.ToString(), SearchModificator.Group));
-                        PhaseInfos.Add(new PhaseInfo(Phase, modificator, true));
-                        PhaseInfos.Add(new PhaseInfo(settings.GroupModificator.ToString(), SearchModificator.Group));
-                    } else {
-                        PhaseInfos.Add(new PhaseInfo(settings.GroupModificator.ToString() + settings.GroupModificator, modificator));
-                    }
-                    if(addSeparator)
-                        PhaseInfos.Add(new PhaseInfo(settings.PhaseSeparator.ToString()));
+                    BuildGroup(settings, addSeparator, phaseStr, modificator);
                     return;
                 }
                 phaseStr += Phase;
@@ -110,6 +98,20 @@ namespace SearchStringParser {
                 if(phaseStr == string.Empty)
                     return;
                 PhaseInfos.Add(new PhaseInfo(phaseStr, modificator));
+            }
+            void BuildGroup(SearchStringParseSettings settings, bool addSeparator, string phaseStr, SearchModificator modificator) {
+                if(phaseStr != String.Empty)
+                    PhaseInfos.Add(new PhaseInfo(phaseStr, modificator));
+                if(Phase != String.Empty) {
+                    PhaseInfos.Add(new PhaseInfo(settings.GroupModificator.ToString(), SearchModificator.Group));
+                    PhaseInfos.Add(new PhaseInfo(Phase, modificator, true));
+                    PhaseInfos.Add(new PhaseInfo(settings.GroupModificator.ToString(), SearchModificator.Group));
+                }
+                else
+                    PhaseInfos.Add(new PhaseInfo(settings.GroupModificator.ToString() + settings.GroupModificator, modificator));
+                if(addSeparator)
+                    PhaseInfos.Add(new PhaseInfo(settings.PhaseSeparator.ToString()));
+                return;
             }
         }
 
