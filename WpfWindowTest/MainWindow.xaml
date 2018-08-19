@@ -12,33 +12,72 @@
             <TextBox x:Name="tb" Margin="1"/>
             <Border BorderBrush="Black" BorderThickness="1" Padding="1" Margin="1">
                 <TextBlock>
-                <i:Interaction.Behaviors>
-                    <local:TextBlockColorizeBehavior SourceTextBox="{Binding ElementName=tb}">
-                        <local:TextBlockColorizeBehavior.RunRegularStyle>
-                            <Style TargetType="Run">
-                                <Setter Property="Foreground" Value="Black"/>
-                            </Style>
-                        </local:TextBlockColorizeBehavior.RunRegularStyle>
-                        <local:TextBlockColorizeBehavior.RunExcludeStyle>
-                            <Style TargetType="Run">
-                                <Setter Property="Foreground" Value="Red"/>
-                            </Style>
-                        </local:TextBlockColorizeBehavior.RunExcludeStyle>
-                        <local:TextBlockColorizeBehavior.RunIncludeStyle>
-                            <Style TargetType="Run">
-                                <Setter Property="Foreground" Value="Green"/>
-                            </Style>
-                        </local:TextBlockColorizeBehavior.RunIncludeStyle>
-                        <local:TextBlockColorizeBehavior.RunFieldStyle>
-                            <Style TargetType="Run">
-                                <Setter Property="Foreground" Value="Blue"/>
-                            </Style>
-                        </local:TextBlockColorizeBehavior.RunFieldStyle>
-                    </local:TextBlockColorizeBehavior>
-                </i:Interaction.Behaviors>
+                    <i:Interaction.Behaviors>
+                        <local:TextBlockColorizeBehavior SourceTextBox="{Binding ElementName=tb}"
+                                                         ResultListBox="{Binding ElementName=lb}">
+                            <local:TextBlockColorizeBehavior.RunRegularStyle>
+                                <Style TargetType="Run">
+                                    <Setter Property="Foreground" Value="Black"/>
+                                </Style>
+                            </local:TextBlockColorizeBehavior.RunRegularStyle>
+                            <local:TextBlockColorizeBehavior.RunRegularGroupStyle>
+                                <Style TargetType="Run">
+                                    <Setter Property="Foreground" Value="Black"/>
+                                    <Setter Property="Background" Value="Yellow"/>
+                                </Style>
+                            </local:TextBlockColorizeBehavior.RunRegularGroupStyle>
+                            <local:TextBlockColorizeBehavior.RunExcludeStyle>
+                                <Style TargetType="Run">
+                                    <Setter Property="Foreground" Value="Red"/>
+                                </Style>
+                            </local:TextBlockColorizeBehavior.RunExcludeStyle>
+                            <local:TextBlockColorizeBehavior.RunExcludeGroupStyle>
+                                <Style TargetType="Run">
+                                    <Setter Property="Foreground" Value="Red"/>
+                                    <Setter Property="Background" Value="Yellow"/>
+                                </Style>
+                            </local:TextBlockColorizeBehavior.RunExcludeGroupStyle>
+                            <local:TextBlockColorizeBehavior.RunIncludeStyle>
+                                <Style TargetType="Run">
+                                    <Setter Property="Foreground" Value="Green"/>
+                                </Style>
+                            </local:TextBlockColorizeBehavior.RunIncludeStyle>
+                            <local:TextBlockColorizeBehavior.RunIncludeGroupStyle>
+                                <Style TargetType="Run">
+                                    <Setter Property="Foreground" Value="Green"/>
+                                    <Setter Property="Background" Value="Yellow"/>
+                                </Style>
+                            </local:TextBlockColorizeBehavior.RunIncludeGroupStyle>
+                            <local:TextBlockColorizeBehavior.RunFieldStyle>
+                                <Style TargetType="Run">
+                                    <Setter Property="Foreground" Value="Blue"/>
+                                </Style>
+                            </local:TextBlockColorizeBehavior.RunFieldStyle>
+                            <local:TextBlockColorizeBehavior.RunGroupQuoteStyle>
+                                <Style TargetType="Run">
+                                    <Setter Property="Foreground" Value="Gray"/>
+                                </Style>
+                            </local:TextBlockColorizeBehavior.RunGroupQuoteStyle>
+                        </local:TextBlockColorizeBehavior>
+                    </i:Interaction.Behaviors>
                 </TextBlock>
             </Border>
-            <!--"{Binding Path=Text, ElementName=tb, Converter={StaticResource TextToInlinesConverter}}"-->
+            <ListBox x:Name="lb" Height="300" Margin="5" BorderThickness="2">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock>
+                            <TextBlock.Inlines>
+                                <Run Text="Text:"/>
+                                <Run Text="{Binding Text, Mode=OneWay}"/>
+                                <Run Text=", Mode:"/>
+                                <Run Text="{Binding Modificator, Mode=OneWay}"/>
+                                <Run Text=", Grouped:"/>
+                                <Run Text="{Binding Grouped, Mode=OneWay}"/>
+                            </TextBlock.Inlines>
+                        </TextBlock>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
         </StackPanel>
     </Grid>
 </Window>

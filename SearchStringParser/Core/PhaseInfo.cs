@@ -8,6 +8,7 @@ namespace SearchStringParser {
                 throw new InvalidOperationException();
             Text = text;
             Modificator = modificator;
+            Grouped = grouped;
         }
 
         public string Text { get; }
