@@ -37,6 +37,8 @@ namespace SearchStringParser {
                     throw new InvalidOperationException();
                 GroupStarted = true;
                 GroupStartIndex = PhaseMode == PhaseMode.Default ? index : index - 1;
+                if(Field != null)
+                    GroupStartIndex -= Field.Length + 1;
                 if(index < 0)
                     throw new InvalidOperationException();
             }

@@ -1,0 +1,42 @@
+﻿<Window x:Class="WpfWindowTest.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:local="clr-namespace:WpfWindowTest"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <StackPanel>
+            <TextBox x:Name="tb"/>
+            <TextBlock>
+                <i:Interaction.Behaviors>
+                    <local:TextBlockColorizeBehavior SourceTextBox="{Binding ElementName=tb}">
+                        <local:TextBlockColorizeBehavior.RunRegularStyle>
+                            <Style TargetType="Run">
+                                <Setter Property="Foreground" Value="Black"/>
+                            </Style>
+                        </local:TextBlockColorizeBehavior.RunRegularStyle>
+                        <local:TextBlockColorizeBehavior.RunExcludeStyle>
+                            <Style TargetType="Run">
+                                <Setter Property="Foreground" Value="Red"/>
+                            </Style>
+                        </local:TextBlockColorizeBehavior.RunExcludeStyle>
+                        <local:TextBlockColorizeBehavior.RunIncludeStyle>
+                            <Style TargetType="Run">
+                                <Setter Property="Foreground" Value="Green"/>
+                            </Style>
+                        </local:TextBlockColorizeBehavior.RunIncludeStyle>
+                        <local:TextBlockColorizeBehavior.RunFieldStyle>
+                            <Style TargetType="Run">
+                                <Setter Property="Foreground" Value="Blue"/>
+                            </Style>
+                        </local:TextBlockColorizeBehavior.RunFieldStyle>
+                    </local:TextBlockColorizeBehavior>
+                </i:Interaction.Behaviors>
+            </TextBlock>
+            <!--"{Binding Path=Text, ElementName=tb, Converter={StaticResource TextToInlinesConverter}}"-->
+        </StackPanel>
+    </Grid>
+</Window>

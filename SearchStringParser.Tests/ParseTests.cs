@@ -199,6 +199,15 @@ namespace SearchStringParser.Tests {
             Parse(MakeSearchString("a", cGroup + "b")).
                 AssertRegular("a", cGroup + "b").AssertInclude().AssertExclude().
                 AssertPhases("a" + cSpace, cGroup + "b");
+            Parse(SpecificField("f", cGroup.ToString() + "a")).
+                AssertFieldRegular("f", cGroup.ToString() + "a").
+                AssertPhases(SpecificFieldPh("f", cGroup.ToString() + "a"));
+            Parse(Include(SpecificField("f", cGroup.ToString() + "a"))).
+                AssertFieldInclude("f", cGroup.ToString() + "a").
+                AssertPhases(SpecificFieldIncPh("f", cGroup.ToString() + "a"));
+            Parse(Exclude(SpecificField("f", cGroup.ToString() + "a"))).
+                AssertFieldExclude("f", cGroup.ToString() + "a").
+                AssertPhases(SpecificFieldExclPh("f", cGroup.ToString() + "a"));
         }
         [Test]
         public void IgnoreGrouping() {
