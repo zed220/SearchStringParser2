@@ -4,12 +4,15 @@ using System.Linq;
 
 namespace SearchStringParser.Tests {
     public static class ParseTestsExtensions {
-        public static SearchStringParseResult AssertPhases(this SearchStringParseResult result, List<PhaseInfo> expected) {
+        public static SearchStringParseResult AssertPhases(this SearchStringParseResult result, params PhaseInfo[] expected) {
             CollectionAssert.AreEquivalent(expected, result.PhaseInfos);
             return result;
         }
+        public static SearchStringParseResult AssertPhases(this SearchStringParseResult result) {
+            return AssertPhases(result, new PhaseInfo[0]);
+        }
         public static SearchStringParseResult AssertPhases(this SearchStringParseResult result, params string[] expected) {
-            return AssertPhases(result, expected == null ? null : expected.Select(phase => new PhaseInfo(phase)).ToList());
+            return AssertPhases(result, expected == null ? null : expected.Select(phase => new PhaseInfo(phase)).ToArray());
         }
         public static SearchStringParseResult AssertRegular(this SearchStringParseResult result, params string[] searchTexts) {
             AssertSingle(result.Regular, null, searchTexts);

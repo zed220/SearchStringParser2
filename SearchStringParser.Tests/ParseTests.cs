@@ -55,19 +55,19 @@ namespace SearchStringParser.Tests {
         public void SimpleParsing() {
             Parse("a").AssertRegular("a").AssertInclude().AssertExclude().AssertPhases("a");
             Parse("ab").AssertRegular("ab").AssertInclude().AssertExclude().AssertPhases("ab");
-            Parse("a ").AssertRegular("a").AssertInclude().AssertExclude();
-            Parse(" a").AssertRegular("a").AssertInclude().AssertExclude();
-            Parse(" a ").AssertRegular("a").AssertInclude().AssertExclude();
-            Parse(MakeSearchString("a", "b")).AssertRegular("a", "b").AssertInclude().AssertExclude();
-            Parse(MakeSearchString("a", "b", "c")).AssertRegular("a", "b", "c").AssertInclude().AssertExclude();
+            Parse("a ").AssertRegular("a").AssertInclude().AssertExclude().AssertPhases("a" + cSpace);
+            Parse(" a").AssertRegular("a").AssertInclude().AssertExclude().AssertPhases(cSpace.ToString(), "a");
+            Parse(" a ").AssertRegular("a").AssertInclude().AssertExclude().AssertPhases(cSpace.ToString(), "a" + cSpace);
+            Parse(MakeSearchString("a", "b")).AssertRegular("a", "b").AssertInclude().AssertExclude().AssertPhases("a" + cSpace, "b");
+            Parse(MakeSearchString("a", "b", "c")).AssertRegular("a", "b", "c").AssertInclude().AssertExclude().AssertPhases("a" + cSpace, "b" + cSpace, "c");
         }
         [Test]
         public void ModificatorInclude() {
-            Parse(Include("a")).AssertRegular().AssertInclude("a").AssertExclude();
-            Parse(Include("ab")).AssertRegular().AssertInclude("ab").AssertExclude();
-            Parse(Include("ab c")).AssertRegular("c").AssertInclude("ab").AssertExclude();
-            Parse("ab " + Include("c")).AssertRegular("ab").AssertInclude("c").AssertExclude();
-            Parse(Include("a") + " " + Include("b")).AssertRegular().AssertInclude("a", "b").AssertExclude();
+            Parse(Include("a")).AssertRegular().AssertInclude("a").AssertExclude().AssertPhases(new PhaseInfo(Include("a"), SearchModificator.Include));
+            Parse(Include("ab")).AssertRegular().AssertInclude("ab").AssertExclude().AssertPhases(new PhaseInfo(Include("ab"), SearchModificator.Include));
+            Parse(Include("ab c")).AssertRegular("c").AssertInclude("ab").AssertExclude().AssertPhases(new PhaseInfo(Include("ab" + cSpace), SearchModificator.Include), new PhaseInfo("c"));
+            Parse("ab " + Include("c")).AssertRegular("ab").AssertInclude("c").AssertExclude().AssertPhases(new PhaseInfo("ab" + cSpace), new PhaseInfo(Include("c"), SearchModificator.Include));
+            Parse(MakeSearchString(Include("a"), Include("b"))).AssertRegular().AssertInclude("a", "b").AssertExclude().AssertPhases(new PhaseInfo(Include("a" + cSpace), SearchModificator.Include), new PhaseInfo(Include("b"), SearchModificator.Include));
         }
         [Test]
         public void ModificatorExclude() {
