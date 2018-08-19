@@ -25,6 +25,26 @@ namespace SearchStringParser.Tests {
         static PhaseInfo Phase(string searchString) {
             return new PhaseInfo(searchString);
         }
+        static PhaseInfo[] GroupPh(string searchString) {
+            return new[] { new PhaseInfo(cGroup.ToString(), SearchModificator.Group),
+                           new PhaseInfo(searchString, SearchModificator.None, true),
+                           new PhaseInfo(cGroup.ToString(), SearchModificator.Group)
+                         };
+        }
+        static PhaseInfo[] GroupIncPh(string searchString) {
+            return new[] { new PhaseInfo(cInclude.ToString(), SearchModificator.Include),
+                           new PhaseInfo(cGroup.ToString(), SearchModificator.Group),
+                           new PhaseInfo(searchString, SearchModificator.Include, true),
+                           new PhaseInfo(cGroup.ToString(), SearchModificator.Group)
+                         };
+        }
+        static PhaseInfo[] GroupExcPh(string searchString) {
+            return new[] { new PhaseInfo(cExclude.ToString(), SearchModificator.Exclude),
+                           new PhaseInfo(cGroup.ToString(), SearchModificator.Group),
+                           new PhaseInfo(searchString, SearchModificator.Exclude, true),
+                           new PhaseInfo(cGroup.ToString(), SearchModificator.Group)
+                         };
+        }
         static PhaseInfo IncludePh(string searchString) {
             return new PhaseInfo(Include(searchString), SearchModificator.Include);
         }
@@ -131,22 +151,22 @@ namespace SearchStringParser.Tests {
         public void ModificatorGroup() {
             Parse(Group("a")).
                 AssertRegular("a").AssertInclude().AssertExclude().
-                AssertPhases(Group("a"));
+                AssertPhases(GroupPh("a"));
             Parse(Group("a b")).
                 AssertRegular("a b").AssertInclude().AssertExclude().
-                AssertPhases(Group("a b"));
+                AssertPhases(GroupPh("a b"));
             Parse(Include(Group("a"))).
                 AssertRegular().AssertInclude("a").AssertExclude().
-                AssertPhases(IncludePh(Group("a")));
+                AssertPhases(GroupIncPh("a"));
             Parse(Exclude(Group("a"))).
                 AssertRegular().AssertInclude().AssertExclude("a").
-                AssertPhases(ExcludePh(Group("a")));
+                AssertPhases(GroupExcPh("a"));
             Parse(Group(Include("a"))).
                 AssertRegular(Include("a")).AssertInclude().AssertExclude().
-                AssertPhases(Group(Include("a")));
+                AssertPhases(GroupPh(Include("a")));
             Parse(Group(Exclude("a"))).
                 AssertRegular(Exclude("a")).AssertInclude().AssertExclude().
-                AssertPhases(Group(Exclude("a")));
+                AssertPhases(GroupPh(Exclude("a")));
         }
         [Test]
         public void BoundaryValues_Constants() {
@@ -171,10 +191,10 @@ namespace SearchStringParser.Tests {
                 AssertPhases(ExcludePh(cExclude.ToString()));
             Parse(makeDouble(cGroup)).
                 AssertRegular(cGroup.ToString()).AssertInclude().AssertExclude().
-                AssertPhases(cGroup.ToString() + cGroup);
+                AssertPhases(makeDouble(cGroup));
             Parse(makeDouble(cGroup) + cGroup).
                 AssertRegular(cGroup.ToString()).AssertInclude().AssertExclude().
-                AssertPhases(makeDouble(cGroup) + cGroup);
+                AssertPhases(GroupPh(cGroup.ToString()));
             Parse(makeDouble(cSpecificField)).
                 AssertRegular(makeDouble(cSpecificField)).AssertInclude().AssertExclude().
                 AssertPhases(makeDouble(cSpecificField));
@@ -210,10 +230,10 @@ namespace SearchStringParser.Tests {
                 AssertPhases(SpecificFieldExclPh("f", cGroup.ToString() + "a"));
         }
         [Test]
-        public void IgnoreGrouping() {
+        public void SingleQuoteGrouping() {
             Parse(cGroup.ToString() + cGroup + cGroup).
                 AssertRegular(cGroup.ToString()).AssertInclude().AssertExclude().
-                AssertPhases(cGroup.ToString() + cGroup + cGroup);
+                AssertPhases(GroupPh(cGroup.ToString()));
         }
         [Test]
         public void SpecField() {
@@ -222,13 +242,13 @@ namespace SearchStringParser.Tests {
                 AssertPhases(SpecificFieldPh("f", "a"));
             Parse(Group(SpecificField("a", "b"))).
                 AssertRegular(SpecificField("a", "b")).AssertInclude().AssertExclude().
-                AssertPhases(Group(SpecificField("a", "b")));
+                AssertPhases(GroupPh(SpecificField("a", "b")));
             Parse(Include(Group(SpecificField("a", "b")))).
                 AssertRegular().AssertInclude(SpecificField("a", "b")).AssertExclude().
-                AssertPhases(IncludePh(Group(SpecificField("a", "b"))));
+                AssertPhases(GroupIncPh(SpecificField("a", "b")));
             Parse(Group(Include(SpecificField("a", "b")))).
                 AssertRegular(Include(SpecificField("a", "b"))).AssertInclude().AssertExclude().
-                AssertPhases(Group(Include(SpecificField("a", "b"))));
+                AssertPhases(GroupPh(Include(SpecificField("a", "b"))));
             Parse(Include(SpecificField("f", "a"))).
                 AssertRegular().AssertFieldInclude("f", "a").AssertExclude().
                 AssertPhases(SpecificFieldIncPh("f", "a"));

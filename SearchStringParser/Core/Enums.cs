@@ -1,5 +1,5 @@
 ﻿namespace SearchStringParser {
     public enum SearchModificator {
-        None, Include, Exclude, Field
+        None, Include, Exclude, Field, Group
     }
 }

@@ -90,18 +90,27 @@ namespace SearchStringParser {
                     PhaseInfos.Add(new PhaseInfo(settings.SpecificFieldModificator.ToString()));
                     phaseStr = string.Empty;
                 }
-                if(GroupStarted && GroupFinished)
-                    phaseStr += settings.GroupModificator;
+                if(GroupStarted && GroupFinished) {
+                    if(phaseStr != String.Empty)
+                        PhaseInfos.Add(new PhaseInfo(phaseStr, modificator));
+                    if(Phase != String.Empty) {
+                        PhaseInfos.Add(new PhaseInfo(settings.GroupModificator.ToString(), SearchModificator.Group));
+                        PhaseInfos.Add(new PhaseInfo(Phase, modificator, true));
+                        PhaseInfos.Add(new PhaseInfo(settings.GroupModificator.ToString(), SearchModificator.Group));
+                    } else {
+                        PhaseInfos.Add(new PhaseInfo(settings.GroupModificator.ToString() + settings.GroupModificator, modificator));
+                    }
+                    if(addSeparator)
+                        PhaseInfos.Add(new PhaseInfo(settings.PhaseSeparator.ToString()));
+                    return;
+                }
                 phaseStr += Phase;
-                if(GroupFinished)
-                    phaseStr += settings.GroupModificator;
                 if(addSeparator)
                     phaseStr += settings.PhaseSeparator;
                 if(phaseStr == string.Empty)
                     return;
                 PhaseInfos.Add(new PhaseInfo(phaseStr, modificator));
             }
-
         }
 
         #endregion
