@@ -86,6 +86,7 @@ namespace SearchStringParser {
                         PhaseInfos.Add(new PhaseInfo(phaseStr, modificator));
                     PhaseInfos.Add(new PhaseInfo(Field, SearchModificator.Field));
                     PhaseInfos.Add(new PhaseInfo(settings.SpecificFieldModificator.ToString()));
+                    phaseStr = string.Empty;
                 }
                 if(GroupStarted && GroupFinished)
                     phaseStr += settings.GroupModificator;

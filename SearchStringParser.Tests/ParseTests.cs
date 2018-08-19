@@ -211,19 +211,39 @@ namespace SearchStringParser.Tests {
             Parse(SpecificField("f", "a")).
                 AssertFieldRegular("f", "a").AssertInclude().AssertExclude().
                 AssertPhases(SpecificFieldPh("f", "a"));
-            Parse(Group(SpecificField("a", "b"))).AssertRegular(SpecificField("a", "b")).AssertInclude().AssertExclude();
-            Parse(Include(Group(SpecificField("a", "b")))).AssertRegular().AssertInclude(SpecificField("a", "b")).AssertExclude();
-            Parse(Group(Include(SpecificField("a", "b")))).AssertRegular(Include(SpecificField("a", "b"))).AssertInclude().AssertExclude();
-            Parse(Include(SpecificField("f", "a"))).AssertRegular().AssertFieldInclude("f", "a").AssertExclude();
-            Parse(Exclude(SpecificField("f", "a"))).AssertRegular().AssertFieldExclude("f", "a").AssertInclude();
-            Parse(SpecificField("f", String.Empty)).AssertRegular(SpecificField("f", String.Empty)).AssertInclude().AssertExclude();
-            Parse(Include(SpecificField("f", String.Empty))).AssertRegular().AssertInclude(SpecificField("f", String.Empty)).AssertExclude();
-            Parse(Exclude(SpecificField("f", String.Empty))).AssertRegular().AssertExclude(SpecificField("f", String.Empty)).AssertInclude();
+            Parse(Group(SpecificField("a", "b"))).
+                AssertRegular(SpecificField("a", "b")).AssertInclude().AssertExclude().
+                AssertPhases(Group(SpecificField("a", "b")));
+            Parse(Include(Group(SpecificField("a", "b")))).
+                AssertRegular().AssertInclude(SpecificField("a", "b")).AssertExclude().
+                AssertPhases(IncludePh(Group(SpecificField("a", "b"))));
+            Parse(Group(Include(SpecificField("a", "b")))).
+                AssertRegular(Include(SpecificField("a", "b"))).AssertInclude().AssertExclude().
+                AssertPhases(Group(Include(SpecificField("a", "b"))));
+            Parse(Include(SpecificField("f", "a"))).
+                AssertRegular().AssertFieldInclude("f", "a").AssertExclude().
+                AssertPhases(SpecificFieldIncPh("f", "a"));
+            Parse(Exclude(SpecificField("f", "a"))).
+                AssertRegular().AssertFieldExclude("f", "a").AssertInclude().
+                AssertPhases(SpecificFieldExclPh("f", "a"));
+            Parse(SpecificField("f", String.Empty)).
+                AssertRegular(SpecificField("f", String.Empty)).AssertInclude().AssertExclude().
+                AssertPhases(SpecificField("f", String.Empty));
+            Parse(Include(SpecificField("f", String.Empty))).
+                AssertRegular().AssertInclude(SpecificField("f", String.Empty)).AssertExclude().
+                AssertPhases(IncludePh(SpecificField("f", String.Empty)));
+            Parse(Exclude(SpecificField("f", String.Empty))).
+                AssertRegular().AssertExclude(SpecificField("f", String.Empty)).AssertInclude().
+                AssertPhases(ExcludePh(SpecificField("f", String.Empty)));
         }
         [Test]
         public void RealCase1() {
             string s = MakeSearchString("regular", Include("plus"), Exclude("minus"), SpecificField("field", "someInField"));
-            Parse(s).AssertRegular("regular").AssertExclude("minus").AssertInclude("plus").AssertFieldRegular("field", "someInField");
+            var phases = new List<PhaseInfo>() { Phase("regular" + cSpace), ExcludePh("minus" + cSpace), IncludePh("plus" + cSpace) };
+            phases.AddRange(SpecificFieldPh("field", "someInField"));
+            Parse(s).
+                AssertRegular("regular").AssertExclude("minus").AssertInclude("plus").AssertFieldRegular("field", "someInField").
+                AssertPhases(phases.ToArray());
         }
     }
 }
