@@ -244,6 +244,12 @@ namespace SearchStringParser.Tests {
             Parse(Exclude(SpecificField("f", String.Empty))).
                 AssertRegular().AssertExclude(SpecificField("f", String.Empty)).AssertInclude().
                 AssertPhases(ExcludePh(SpecificField("f", String.Empty)));
+            Parse(SpecificField("f", Exclude("a"))).
+                AssertFieldRegular("f", Exclude("a")).
+                AssertPhases(SpecificFieldPh("f", Exclude("a")));
+            Parse(SpecificField("f", Include("a"))).
+                AssertFieldRegular("f", Include("a")).
+                AssertPhases(SpecificFieldPh("f", Include("a")));
         }
         [Test]
         public void RealCase1() {

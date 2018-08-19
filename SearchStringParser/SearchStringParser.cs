@@ -143,14 +143,16 @@ namespace SearchStringParser {
                             state.StartGroup(i);
                             continue;
                         }
-                        if(state.PhaseMode == PhaseMode.Default) {
-                            if(c == settings.ExcludeModificator) {
-                                state.SetPhaseMode(PhaseMode.Exclude, c);
-                                continue;
-                            }
-                            if(c == settings.IncludeModificator) {
-                                state.SetPhaseMode(PhaseMode.Include, c);
-                                continue;
+                        if(state.Field == null) {
+                            if(state.PhaseMode == PhaseMode.Default) {
+                                if(c == settings.ExcludeModificator) {
+                                    state.SetPhaseMode(PhaseMode.Exclude, c);
+                                    continue;
+                                }
+                                if(c == settings.IncludeModificator) {
+                                    state.SetPhaseMode(PhaseMode.Include, c);
+                                    continue;
+                                }
                             }
                         }
                     }

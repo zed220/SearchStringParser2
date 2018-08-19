@@ -9,8 +9,9 @@
         Title="MainWindow" Height="450" Width="800">
     <Grid>
         <StackPanel>
-            <TextBox x:Name="tb"/>
-            <TextBlock>
+            <TextBox x:Name="tb" Margin="1"/>
+            <Border BorderBrush="Black" BorderThickness="1" Padding="1" Margin="1">
+                <TextBlock>
                 <i:Interaction.Behaviors>
                     <local:TextBlockColorizeBehavior SourceTextBox="{Binding ElementName=tb}">
                         <local:TextBlockColorizeBehavior.RunRegularStyle>
@@ -35,7 +36,8 @@
                         </local:TextBlockColorizeBehavior.RunFieldStyle>
                     </local:TextBlockColorizeBehavior>
                 </i:Interaction.Behaviors>
-            </TextBlock>
+                </TextBlock>
+            </Border>
             <!--"{Binding Path=Text, ElementName=tb, Converter={StaticResource TextToInlinesConverter}}"-->
         </StackPanel>
     </Grid>
