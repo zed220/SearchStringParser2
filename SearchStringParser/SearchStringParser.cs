@@ -61,12 +61,17 @@ namespace SearchStringParser {
                 Phase = String.Empty;
             }
             public void Build(SearchStringParseSettings settings, bool addSeparator) {
-                if(Phase == string.Empty && Field != null) {
+                if(Phase == string.Empty && Field != null && !GroupFinished) {
                     Phase = Field + settings.SpecificFieldModificator;
                     Field = null;
                 }
                 if(GroupStarted && !GroupFinished)
                     Phase = settings.GroupModificator + Phase;
+                if(Phase == String.Empty && GroupFinished) {
+                    GroupStarted = false;
+                    GroupFinished = false;
+                    Phase = settings.GroupModificator.ToString() + settings.GroupModificator;
+                }
                 string phaseStr = String.Empty;
                 SearchModificator modificator = SearchModificator.None;
                 switch(PhaseMode) {

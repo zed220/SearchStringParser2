@@ -190,7 +190,7 @@ namespace SearchStringParser.Tests {
                 AssertRegular().AssertInclude().AssertExclude(Exclude(String.Empty)).
                 AssertPhases(ExcludePh(cExclude.ToString()));
             Parse(makeDouble(cGroup)).
-                AssertRegular(cGroup.ToString()).AssertInclude().AssertExclude().
+                AssertRegular(makeDouble(cGroup)).AssertInclude().AssertExclude().
                 AssertPhases(makeDouble(cGroup));
             Parse(makeDouble(cGroup) + cGroup).
                 AssertRegular(cGroup.ToString()).AssertInclude().AssertExclude().
@@ -270,6 +270,15 @@ namespace SearchStringParser.Tests {
             Parse(SpecificField("f", Include("a"))).
                 AssertFieldRegular("f", Include("a")).
                 AssertPhases(SpecificFieldPh("f", Include("a")));
+            Parse(SpecificField("f", Group(String.Empty))).
+                AssertFieldRegular("f", Group(String.Empty)).
+                AssertPhases(SpecificFieldPh("f", cGroup.ToString() + cGroup));
+            Parse(Include(SpecificField("f", Group(String.Empty)))).
+                AssertFieldInclude("f", Group(String.Empty)).
+                AssertPhases(SpecificFieldIncPh("f", cGroup.ToString() + cGroup));
+            Parse(Exclude(SpecificField("f", Group(String.Empty)))).
+                AssertFieldExclude("f", Group(String.Empty)).
+                AssertPhases(SpecificFieldExclPh("f", cGroup.ToString() + cGroup));
         }
         [Test]
         public void RealCase1() {
