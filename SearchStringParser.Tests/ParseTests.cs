@@ -83,18 +83,18 @@ namespace SearchStringParser.Tests {
         public void BoundaryValues_Elemental() {
             Parse(null).AssertRegular().AssertInclude().AssertExclude().AssertPhases();
             Parse("").AssertRegular().AssertInclude().AssertExclude().AssertPhases();
-            Parse(cSpace.ToString()).AssertRegular().AssertInclude().AssertExclude().AssertPhases(" ");
-            Parse(cSpace.ToString() + cSpace.ToString()).AssertRegular().AssertInclude().AssertExclude().AssertPhases("  ");
+            Parse(cSpace.ToString()).AssertRegular().AssertInclude().AssertExclude().AssertPhases(cSpace.ToString());
+            Parse(cSpace.ToString() + cSpace.ToString()).AssertRegular().AssertInclude().AssertExclude().AssertPhases(cSpace.ToString(), cSpace.ToString());
         }
         [Test]
         public void SimpleParsing() {
             Parse("a").AssertRegular("a").AssertInclude().AssertExclude().AssertPhases("a");
             Parse("ab").AssertRegular("ab").AssertInclude().AssertExclude().AssertPhases("ab");
-            Parse("a ").AssertRegular("a").AssertInclude().AssertExclude().AssertPhases("a" + cSpace);
+            Parse("a ").AssertRegular("a").AssertInclude().AssertExclude().AssertPhases("a", cSpace.ToString());
             Parse(" a").AssertRegular("a").AssertInclude().AssertExclude().AssertPhases(cSpace.ToString(), "a");
-            Parse(" a ").AssertRegular("a").AssertInclude().AssertExclude().AssertPhases(cSpace.ToString(), "a" + cSpace);
-            Parse(MakeSearchString("a", "b")).AssertRegular("a", "b").AssertInclude().AssertExclude().AssertPhases("a" + cSpace, "b");
-            Parse(MakeSearchString("a", "b", "c")).AssertRegular("a", "b", "c").AssertInclude().AssertExclude().AssertPhases("a" + cSpace, "b" + cSpace, "c");
+            Parse(" a ").AssertRegular("a").AssertInclude().AssertExclude().AssertPhases(cSpace.ToString(), "a", cSpace.ToString());
+            Parse(MakeSearchString("a", "b")).AssertRegular("a", "b").AssertInclude().AssertExclude().AssertPhases("a", cSpace.ToString(), "b");
+            Parse(MakeSearchString("a", "b", "c")).AssertRegular("a", "b", "c").AssertInclude().AssertExclude().AssertPhases("a", cSpace.ToString(), "b", cSpace.ToString(), "c");
         }
         [Test]
         public void ModificatorInclude() {

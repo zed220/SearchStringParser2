@@ -5,75 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace SearchStringParser {
-    enum SearchStringParseState {
-        Calculating, Completed
-    }
-
-    class SearchStringPhaseBuilder {
-        readonly SearchStringParseSettings settings;
-
-        string phase = string.Empty;
-
-        public SearchStringPhaseBuilder(SearchStringParseSettings settings) {
-            this.settings = settings;
-            Flush();
-        }
-
-        public void ApplyAndFlush(SearchStringParseResult result) {
-            var r = MakeResult();
-            result.Regular.AddRange(r.Regular);
-            result.Exclude.AddRange(r.Exclude);
-            result.Include.AddRange(r.Include);
-            result.PhaseInfos.AddRange(r.PhaseInfos);
-            Flush();
-        }
-
-        SearchStringParseResult MakeResult() {
-            var r = new SearchStringParseResult();
-            FillSearchResult(r);
-            FillPhases(r);
-            return r;
-        }
-        void FillSearchResult(SearchStringParseResult result) {
-            if(phase == String.Empty)
-                return;
-            result.Regular.Add(new SearchStringParseInfo(phase));
-        }
-        void FillPhases(SearchStringParseResult result) {
-            if(phase == String.Empty)
-                return;
-            result.PhaseInfos.Add(new PhaseInfo(phase));
-        }
-
-        void Flush() {
-            phase = string.Empty;
-        }
-
-        public SearchStringParseState Add(char c) {
-            if(c == settings.PhaseSeparator) {
-                if(IsPhaseEnded())
-                    return SearchStringParseState.Completed;
-            }
-            phase += c;
-            return SearchStringParseState.Calculating;
-        }
-
-        bool IsPhaseEnded() {
-            return true;
-        }
-    }
-
     public class SearchStringParser2 {
-        //readonly string searchText;
-        //readonly SearchStringParseSettings settings;
-        //readonly SearchStringPhaseBuilder builder;
-
-        public SearchStringParser2() {
-            //this.searchText = searchText;
-            //this.settings = settings;
-            //this.builder = new SearchStringPhaseBuilder(settings);
-        }
-
         public SearchStringParseResult Parse(string searchText, SearchStringParseSettings settings) {
             SearchStringParseResult result = new SearchStringParseResult();
             var builder = new SearchStringPhaseBuilder(settings);
