@@ -1,12 +1,28 @@
 ﻿using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace SearchStringParser.Tests {
     public static class ParseTestsExtensions {
         public static SearchStringParseResult AssertPhases(this SearchStringParseResult result, params PhaseInfo[] expected) {
-            CollectionAssert.AreEquivalent(expected, result.PhaseInfos);
+            CollectionAssert.AreEquivalent(expected, result.PhaseInfos, BuildDiffMessage(expected, result.PhaseInfos));
             return result;
+        }
+        static string BuildDiffMessage(PhaseInfo[] expected, List<PhaseInfo> phaseInfos) {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"Expected/Actual Counts:{expected.Length}/{phaseInfos.Count}");
+            sb.AppendLine("Expected:");
+            Action<PhaseInfo> fillPhaseInfo = info => {
+                sb.AppendLine($"{nameof(PhaseInfo.Text)}:{info.Text}, {nameof(PhaseInfo.Modificator)}:{info.Modificator}, {nameof(PhaseInfo.Grouped)}:{info.Grouped}");
+            };
+            foreach(var el in expected)
+                fillPhaseInfo(el);
+            sb.AppendLine("Actual:");
+            foreach(var el in phaseInfos)
+                fillPhaseInfo(el);
+            return sb.ToString();
         }
         public static SearchStringParseResult AssertPhases(this SearchStringParseResult result) {
             return AssertPhases(result, new PhaseInfo[0]);

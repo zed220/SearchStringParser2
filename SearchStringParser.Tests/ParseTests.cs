@@ -14,7 +14,7 @@ namespace SearchStringParser.Tests {
         static char cSpecificField { get { return SearchStringParseSettings.Default.SpecificFieldModificator; } }
 
         static SearchStringParseResult Parse(string text, SearchStringParseSettings settings = null) {
-            return SearchStringParser.Parse(text, settings ?? SearchStringParseSettings.Default);
+            return new SearchStringParser2().Parse(text, settings ?? SearchStringParseSettings.Default);
         }
         static string Include(string searchString) {
             return cInclude + searchString;
