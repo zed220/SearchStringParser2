@@ -19,12 +19,7 @@ namespace SearchStringParser.Tests {
             var expectedColelction = expectedAdd == null ? expected : Enumerable.Concat(expected, expectedAdd).ToArray();
             CollectionAssert.AreEquivalent(expectedColelction, result.PhaseInfos, BuildDiffMessage(expectedColelction, result.PhaseInfos));
             return result;
-            //return AssertPhases(result, Enumerable.Concat(expected, expectedAdd).ToArray());
         }
-        //public static SearchStringParseResult AssertPhases(this SearchStringParseResult result, params PhaseInfo[] expected) {
-        //    CollectionAssert.AreEquivalent(expected, result.PhaseInfos, BuildDiffMessage(expected, result.PhaseInfos));
-        //    return result;
-        //}
         static string BuildDiffMessage(PhaseInfo[] expected, List<PhaseInfo> phaseInfos) {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($"Expected/Actual Counts:{expected.Length}/{phaseInfos.Count}");

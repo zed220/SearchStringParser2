@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace SearchStringParser {
     class SearchStringPhaseBuilder {
@@ -8,6 +9,8 @@ namespace SearchStringParser {
         bool hasSpace = false;
         bool include = false;
         bool exclude = false;
+        bool groupStarted = false;
+        bool groupFinished = false;
 
         public SearchStringPhaseBuilder(SearchStringParseSettings settings) {
             this.settings = settings;
@@ -63,10 +66,20 @@ namespace SearchStringParser {
             }
             if(modificator != SearchModificator.None)
                 result.PhaseInfos.Add(new PhaseInfo(modificatorStr, modificator));
-            if(phase != String.Empty)
-                result.PhaseInfos.Add(new PhaseInfo(phase, modificator));
+            result.PhaseInfos.AddRange(GetPhase(modificator));
             if(hasSpace)
                 result.PhaseInfos.Add(new PhaseInfo(settings.PhaseSeparator.ToString()));
+        }
+        List<PhaseInfo> GetPhase(SearchModificator modificator) {
+            var result = new List<PhaseInfo>();
+            bool grouped = groupStarted && groupFinished;
+            if(groupStarted && groupFinished)
+                result.Add(new PhaseInfo(settings.GroupModificator.ToString(), SearchModificator.Group));
+            if(phase != string.Empty)
+                result.Add(new PhaseInfo(phase, modificator, grouped));
+            if(groupStarted && groupFinished)
+                result.Add(new PhaseInfo(settings.GroupModificator.ToString(), SearchModificator.Group));
+            return result;
         }
 
         void Flush() {
@@ -74,16 +87,18 @@ namespace SearchStringParser {
             hasSpace = false;
             include = false;
             exclude = false;
+            groupStarted = false;
+            groupFinished = false;
         }
 
-        public SearchStringParseState Add(char c) {
+        public SearchStringParseState Add(char c, Func<char?> tryGetNextChar) {
             if(c == settings.PhaseSeparator) {
                 if(IsPhaseEnded()) {
                     hasSpace = true;
                     return SearchStringParseState.Completed;
                 }
             }
-            if(phase == string.Empty) {
+            if(phase == string.Empty && !groupStarted) {
                 if(c == settings.IncludeModificator) {
                     include = true;
                     return SearchStringParseState.Calculating;
@@ -92,12 +107,27 @@ namespace SearchStringParser {
                     exclude = true;
                     return SearchStringParseState.Calculating;
                 }
+                if(c == settings.GroupModificator) {
+                    if(!groupStarted) {
+                        groupStarted = true;
+                        return SearchStringParseState.Calculating;
+                    }
+                }
+            }
+            if(c == settings.GroupModificator) {
+                char? nextC = tryGetNextChar();
+                if(!nextC.HasValue || nextC.Value == settings.PhaseSeparator) {
+                    groupFinished = true;
+                    return SearchStringParseState.Completed;
+                }
             }
             phase += c;
             return SearchStringParseState.Calculating;
         }
 
         bool IsPhaseEnded() {
+            if(groupStarted && !groupFinished)
+                return false;
             return true;
         }
     }

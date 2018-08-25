@@ -10,8 +10,14 @@ namespace SearchStringParser {
             SearchStringParseResult result = new SearchStringParseResult();
             var builder = new SearchStringPhaseBuilder(settings);
             if(searchText != null) {
-                for(int i = 0; i < searchText.Length; i++) {
-                    switch(builder.Add(searchText[i])) {
+                int i = 0;
+                Func<char?> getNextChar = () => {
+                    if(i < searchText.Length - 1)
+                        return searchText[i + 1];
+                    return null;
+                };
+                for(i = 0; i < searchText.Length; i++) {
+                    switch(builder.Add(searchText[i], getNextChar)) {
                         case SearchStringParseState.Completed:
                             builder.ApplyAndFlush(result);
                             break;
