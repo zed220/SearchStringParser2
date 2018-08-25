@@ -1,6 +1,7 @@
 ﻿using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -139,16 +140,16 @@ namespace SearchStringParser.Tests {
         public void ModificatorIncludeExclude() {
             Parse(Exclude("a") + cSpace + Include("b")).
                 AssertRegular().AssertExclude("a").AssertInclude("b").
-                AssertPhases(ExcludePh("a" + cSpace), IncludePh("b"));
+                AssertPhases(ExcludePh("a"), Phase(cSpace), IncludePh("b"));
             Parse(Exclude("b") + cSpace + Include("a")).
                 AssertRegular().AssertExclude("b").AssertInclude("a").
-                AssertPhases(ExcludePh("b" + cSpace), IncludePh("a"));
+                AssertPhases(ExcludePh("b"), Phase(cSpace), IncludePh("a"));
             Parse(Exclude("a") + cSpace + "c" + cSpace + Include("b")).
                 AssertRegular("c").AssertExclude("a").AssertInclude("b").
-                AssertPhases(ExcludePh("a" + cSpace), Phase("c" + cSpace), IncludePh("b"));
+                AssertPhases(ExcludePh("a"), Enumerable.Concat(new[] { Phase(cSpace), Phase("c"), Phase(cSpace) }, IncludePh("b")).ToArray());
             Parse(Exclude("b") + cSpace + "c" + cSpace + Include("a")).
                 AssertRegular("c").AssertExclude("b").AssertInclude("a").
-                AssertPhases(ExcludePh("b" + cSpace), Phase("c" + cSpace), IncludePh("a"));
+                AssertPhases(ExcludePh("b"), Enumerable.Concat(new[] { Phase(cSpace), Phase("c"), Phase(cSpace) }, IncludePh("a")).ToArray());
         }
         [Test]
         public void ModificatorGroup() {
