@@ -42,6 +42,10 @@ namespace SearchStringParser {
                 exclude = false;
                 phase += settings.ExcludeModificator;
             }
+            if(groupStarted && !groupFinished) {
+                groupStarted = false;
+                phase = settings.GroupModificator + phase;
+            }
         }
         void FillSearchResult(SearchStringParseResult result) {
             if(phase == String.Empty)
