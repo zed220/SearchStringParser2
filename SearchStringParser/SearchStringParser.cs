@@ -16,15 +16,15 @@ namespace SearchStringParser {
                         return searchText[i + 1];
                     return null;
                 };
+                bool ignoreGrouping = false;
                 for(i = 0; i < searchText.Length; i++) {
-                    switch(builder.Add(searchText[i], getNextChar, true)) {
+                    switch(builder.Add(searchText[i], getNextChar, i, ignoreGrouping)) {
                         case SearchStringParseState.Completed:
-                            builder.ApplyAndFlush(result, ref i);
+                            builder.ApplyAndFlush(result, ref i, ref ignoreGrouping);
                             break;
                     }
                 }
             }
-            //builder.ApplyAndFlush(result, ref i);
             return result;
         }
     }

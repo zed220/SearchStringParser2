@@ -12,13 +12,19 @@ namespace SearchStringParser {
         bool groupStarted = false;
         bool groupFinished = false;
         int groupIndex = -1;
+        bool ignoreGrouping = false;
 
         public SearchStringPhaseBuilder(SearchStringParseSettings settings) {
             this.settings = settings;
             Flush();
         }
 
-        public void ApplyAndFlush(SearchStringParseResult result, ref int index) {
+        public void ApplyAndFlush(SearchStringParseResult result, ref int index, ref bool ignoreGrouping) {
+            if(DetectUnfinishedGroup(ref index, ref ignoreGrouping)) {
+                Flush();
+                return;
+            }
+            BoundaryValues();
             var r = MakeResult();
             result.Regular.AddRange(r.Regular);
             result.Exclude.AddRange(r.Exclude);
@@ -26,9 +32,16 @@ namespace SearchStringParser {
             result.PhaseInfos.AddRange(r.PhaseInfos);
             Flush();
         }
+        bool DetectUnfinishedGroup(ref int index, ref bool ignoreGrouping) {
+            if(groupStarted && !groupFinished) {
+                index = groupIndex - 1;
+                ignoreGrouping = true;
+                return true;
+            }
+            return false;
+        }
 
         SearchStringParseResult MakeResult() {
-            BoundaryValues();
             var r = new SearchStringParseResult();
             FillSearchResult(r);
             FillPhases(r);
@@ -43,10 +56,10 @@ namespace SearchStringParser {
                 exclude = false;
                 phase += settings.ExcludeModificator;
             }
-            if(groupStarted && !groupFinished) {
-                groupStarted = false;
-                phase = settings.GroupModificator + phase;
-            }
+            //if(groupStarted && !groupFinished) {
+            //    groupStarted = false;
+            //    phase = settings.GroupModificator + phase;
+            //}
             if(groupStarted && groupFinished && phase == string.Empty) {
                 groupStarted = false;
                 groupFinished = false;
@@ -100,9 +113,10 @@ namespace SearchStringParser {
             groupStarted = false;
             groupFinished = false;
             groupIndex = -1;
+            ignoreGrouping = false;
         }
 
-        public SearchStringParseState Add(char c, Func<char?> tryGetNextChar, bool detectGrouping) {
+        public SearchStringParseState Add(char c, Func<char?> tryGetNextChar, int index, bool ignoreGrouping) {
             char? nextC = tryGetNextChar();
             if(c == settings.PhaseSeparator) {
                 if(IsPhaseEnded()) {
@@ -110,20 +124,23 @@ namespace SearchStringParser {
                     return SearchStringParseState.Completed;
                 }
             }
-            if(phase == string.Empty && !groupStarted && !include && !exclude) {
-                if(c == settings.IncludeModificator) {
-                    include = true;
-                    return GetState(nextC);
-                }
-                if(c == settings.ExcludeModificator) {
-                    exclude = true;
-                    return GetState(nextC);
-                }
-                if(detectGrouping && c == settings.GroupModificator) {
-                    if(!groupStarted) {
-                        groupStarted = true;
+            if(phase == string.Empty && !groupStarted) {
+                if(!include && !exclude) {
+                    if(c == settings.IncludeModificator) {
+                        include = true;
                         return GetState(nextC);
                     }
+                    if(c == settings.ExcludeModificator) {
+                        exclude = true;
+                        return GetState(nextC);
+                    }
+                }
+                if(!ignoreGrouping && c == settings.GroupModificator && !groupStarted) {
+                    groupStarted = true;
+                    groupIndex = index;
+                    if(include || exclude)
+                        groupIndex--;
+                    return GetState(nextC);
                 }
             }
             if(groupStarted && c == settings.GroupModificator) {
