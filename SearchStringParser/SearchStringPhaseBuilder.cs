@@ -46,6 +46,11 @@ namespace SearchStringParser {
                 groupStarted = false;
                 phase = settings.GroupModificator + phase;
             }
+            if(groupStarted && groupFinished && phase == string.Empty) {
+                groupStarted = false;
+                groupFinished = false;
+                phase = settings.GroupModificator.ToString() + settings.GroupModificator;
+            }
         }
         void FillSearchResult(SearchStringParseResult result) {
             if(phase == String.Empty)
@@ -102,7 +107,7 @@ namespace SearchStringParser {
                     return SearchStringParseState.Completed;
                 }
             }
-            if(phase == string.Empty && !groupStarted) {
+            if(phase == string.Empty && !groupStarted && !include && !exclude) {
                 if(c == settings.IncludeModificator) {
                     include = true;
                     return SearchStringParseState.Calculating;
