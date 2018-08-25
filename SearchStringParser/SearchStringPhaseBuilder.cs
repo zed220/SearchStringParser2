@@ -48,14 +48,6 @@ namespace SearchStringParser {
             return r;
         }
         void BoundaryValues() {
-            if(include && phase == string.Empty) {
-                include = false;
-                phase += settings.IncludeModificator;
-            }
-            if(exclude && phase == string.Empty) {
-                exclude = false;
-                phase += settings.ExcludeModificator;
-            }
             if(groupStarted && groupFinished && phase == string.Empty) {
                 groupStarted = false;
                 groupFinished = false;
@@ -64,6 +56,14 @@ namespace SearchStringParser {
             if(field != null && phase == string.Empty) {
                 phase = field + settings.SpecificFieldModificator;
                 field = null;
+            }
+            if(include && phase == string.Empty) {
+                include = false;
+                phase += settings.IncludeModificator;
+            }
+            if(exclude && phase == string.Empty) {
+                exclude = false;
+                phase += settings.ExcludeModificator;
             }
         }
         void FillSearchResult(SearchStringParseResult result) {
@@ -137,7 +137,7 @@ namespace SearchStringParser {
                 }
             }
             if(phase == string.Empty && !groupStarted) {
-                if(!include && !exclude) {
+                if(!include && !exclude && field == null) {
                     if(c == settings.IncludeModificator) {
                         include = true;
                         return GetState(nextC);
@@ -153,13 +153,13 @@ namespace SearchStringParser {
                     return GetState(nextC);
                 }
             }
-            if(groupStarted && c == settings.GroupModificator) {
+            if(c == settings.GroupModificator && groupStarted) {
                 if(!nextC.HasValue || nextC.Value == settings.PhaseSeparator) {
                     groupFinished = true;
                     return SearchStringParseState.Completed;
                 }
             }
-            if(phase != string.Empty && c == settings.SpecificFieldModificator) {
+            if(c == settings.SpecificFieldModificator && field == null && phase != string.Empty && !groupStarted) {
                 field = phase;
                 phase = string.Empty;
                 return GetState(nextC);

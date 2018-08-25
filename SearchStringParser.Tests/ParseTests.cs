@@ -15,7 +15,7 @@ namespace SearchStringParser.Tests {
         static char cSpecificField { get { return SearchStringParseSettings.Default.SpecificFieldModificator; } }
 
         static SearchStringParseResult Parse(string text, SearchStringParseSettings settings = null) {
-            return new SearchStringParser2().Parse(text, settings ?? SearchStringParseSettings.Default);
+            return new SearchStringParser().Parse(text, settings ?? SearchStringParseSettings.Default);
         }
         static string Include(string searchString) {
             return cInclude + searchString;
@@ -286,11 +286,15 @@ namespace SearchStringParser.Tests {
             Parse(Exclude(SpecificField("f", Group(String.Empty)))).
                 AssertFieldExclude("f", Group(String.Empty)).
                 AssertPhases(SpecificFieldExclPh("f", cGroup.ToString() + cGroup));
+            Parse(SpecificField("f", cSpecificField.ToString())).
+                AssertFieldRegular("f", cSpecificField.ToString());
+            Parse(SpecificField("f", cSpecificField.ToString() + cSpecificField)).
+                AssertFieldRegular("f", cSpecificField.ToString() + cSpecificField);
         }
         [Test]
         public void RealCase1() {
             string s = MakeSearchString("regular", Include("plus"), Exclude("minus"), SpecificField("field", "someInField"));
-            var phases = new List<PhaseInfo>() { Phase("regular" + cSpace) };
+            var phases = new List<PhaseInfo>() { Phase("regular"), Phase(cSpace) };
             phases.AddRange(ExcludePh("minus"));
             phases.Add(Phase(cSpace));
             phases.AddRange(IncludePh("plus"));

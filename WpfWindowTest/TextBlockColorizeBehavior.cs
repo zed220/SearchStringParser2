@@ -45,7 +45,7 @@ namespace WpfWindowTest {
 
         void SourceTextBox_TextChanged(object sender, TextChangedEventArgs e) {
             AssociatedObject.Inlines.Clear();
-            SearchStringParseResult result = SearchStringParser.SearchStringParser.Parse(SourceTextBox.Text, SearchStringParseSettings.Default);
+            SearchStringParseResult result = new SearchStringParser.SearchStringParser().Parse(SourceTextBox.Text, SearchStringParseSettings.Default);
             foreach(var info in result.PhaseInfos) {
                 var run = new Run(info.Text);
                 switch(info.Modificator) {
