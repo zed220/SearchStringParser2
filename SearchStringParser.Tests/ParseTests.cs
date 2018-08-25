@@ -84,6 +84,10 @@ namespace SearchStringParser.Tests {
             Assert.AreEqual(':', SearchStringParseSettings.Default.SpecificFieldModificator);
         }
         [Test]
+        public void PhaseInfoNullText() {
+            Assert.Throws<ArgumentNullException>(() => new PhaseInfo(null));
+        }
+        [Test]
         public void BoundaryValues_Elemental() {
             Parse(null).AssertRegular().AssertInclude().AssertExclude().AssertPhases();
             Parse("").AssertRegular().AssertInclude().AssertExclude().AssertPhases();

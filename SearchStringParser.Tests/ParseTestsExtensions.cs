@@ -12,9 +12,6 @@ namespace SearchStringParser.Tests {
         public static SearchStringParseResult AssertPhases(this SearchStringParseResult result, PhaseInfo expected1, PhaseInfo expected2, params PhaseInfo[] expectedAdd) {
             return AssertPhases(result, new[] { expected1, expected2 }, expectedAdd);
         }
-        public static SearchStringParseResult AssertPhases(this SearchStringParseResult result, PhaseInfo expected, params PhaseInfo[] expectedAdd) {
-            return AssertPhases(result, new[] { expected }, expectedAdd);
-        }
         public static SearchStringParseResult AssertPhases(this SearchStringParseResult result, PhaseInfo[] expected, params PhaseInfo[] expectedAdd) {
             var expectedColelction = expectedAdd == null ? expected : Enumerable.Concat(expected, expectedAdd).ToArray();
             CollectionAssert.AreEquivalent(expectedColelction, result.PhaseInfos, BuildDiffMessage(expectedColelction, result.PhaseInfos));
