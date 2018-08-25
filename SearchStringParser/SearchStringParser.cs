@@ -17,14 +17,14 @@ namespace SearchStringParser {
                     return null;
                 };
                 for(i = 0; i < searchText.Length; i++) {
-                    switch(builder.Add(searchText[i], getNextChar)) {
+                    switch(builder.Add(searchText[i], getNextChar, true)) {
                         case SearchStringParseState.Completed:
-                            builder.ApplyAndFlush(result);
+                            builder.ApplyAndFlush(result, ref i);
                             break;
                     }
                 }
             }
-            builder.ApplyAndFlush(result);
+            //builder.ApplyAndFlush(result, ref i);
             return result;
         }
     }

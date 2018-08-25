@@ -11,13 +11,14 @@ namespace SearchStringParser {
         bool exclude = false;
         bool groupStarted = false;
         bool groupFinished = false;
+        int groupIndex = -1;
 
         public SearchStringPhaseBuilder(SearchStringParseSettings settings) {
             this.settings = settings;
             Flush();
         }
 
-        public void ApplyAndFlush(SearchStringParseResult result) {
+        public void ApplyAndFlush(SearchStringParseResult result, ref int index) {
             var r = MakeResult();
             result.Regular.AddRange(r.Regular);
             result.Exclude.AddRange(r.Exclude);
@@ -98,9 +99,11 @@ namespace SearchStringParser {
             exclude = false;
             groupStarted = false;
             groupFinished = false;
+            groupIndex = -1;
         }
 
-        public SearchStringParseState Add(char c, Func<char?> tryGetNextChar) {
+        public SearchStringParseState Add(char c, Func<char?> tryGetNextChar, bool detectGrouping) {
+            char? nextC = tryGetNextChar();
             if(c == settings.PhaseSeparator) {
                 if(IsPhaseEnded()) {
                     hasSpace = true;
@@ -110,28 +113,30 @@ namespace SearchStringParser {
             if(phase == string.Empty && !groupStarted && !include && !exclude) {
                 if(c == settings.IncludeModificator) {
                     include = true;
-                    return SearchStringParseState.Calculating;
+                    return GetState(nextC);
                 }
                 if(c == settings.ExcludeModificator) {
                     exclude = true;
-                    return SearchStringParseState.Calculating;
+                    return GetState(nextC);
                 }
-                if(c == settings.GroupModificator) {
+                if(detectGrouping && c == settings.GroupModificator) {
                     if(!groupStarted) {
                         groupStarted = true;
-                        return SearchStringParseState.Calculating;
+                        return GetState(nextC);
                     }
                 }
             }
-            if(c == settings.GroupModificator) {
-                char? nextC = tryGetNextChar();
+            if(groupStarted && c == settings.GroupModificator) {
                 if(!nextC.HasValue || nextC.Value == settings.PhaseSeparator) {
                     groupFinished = true;
                     return SearchStringParseState.Completed;
                 }
             }
             phase += c;
-            return SearchStringParseState.Calculating;
+            return GetState(nextC);
+        }
+        SearchStringParseState GetState(char? nextC) {
+            return nextC.HasValue ? SearchStringParseState.Calculating : SearchStringParseState.Completed;
         }
 
         bool IsPhaseEnded() {
