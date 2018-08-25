@@ -7,6 +7,7 @@ namespace SearchStringParser {
         string phase = string.Empty;
         bool hasSpace = false;
         bool include = false;
+        bool exclude = false;
 
         public SearchStringPhaseBuilder(SearchStringParseSettings settings) {
             this.settings = settings;
@@ -34,20 +35,36 @@ namespace SearchStringParser {
                 include = false;
                 phase += settings.IncludeModificator;
             }
+            if(exclude && phase == string.Empty) {
+                exclude = false;
+                phase += settings.ExcludeModificator;
+            }
         }
         void FillSearchResult(SearchStringParseResult result) {
             if(phase == String.Empty)
                 return;
             if(include)
                 result.Include.Add(new SearchStringParseInfo(phase));
+            else if(exclude)
+                result.Exclude.Add(new SearchStringParseInfo(phase));
             else
                 result.Regular.Add(new SearchStringParseInfo(phase));
         }
         void FillPhases(SearchStringParseResult result) {
-            if(include)
-                result.PhaseInfos.Add(new PhaseInfo(settings.IncludeModificator.ToString(), SearchModificator.Include));
+            SearchModificator modificator = SearchModificator.None;
+            string modificatorStr = string.Empty;
+            if(include) {
+                modificator = SearchModificator.Include;
+                modificatorStr = settings.IncludeModificator.ToString();
+            }
+            if(exclude) {
+                modificator = SearchModificator.Exclude;
+                modificatorStr = settings.ExcludeModificator.ToString();
+            }
+            if(modificator != SearchModificator.None)
+                result.PhaseInfos.Add(new PhaseInfo(modificatorStr, modificator));
             if(phase != String.Empty)
-                result.PhaseInfos.Add(new PhaseInfo(phase, include ? SearchModificator.Include : SearchModificator.None));
+                result.PhaseInfos.Add(new PhaseInfo(phase, modificator));
             if(hasSpace)
                 result.PhaseInfos.Add(new PhaseInfo(settings.PhaseSeparator.ToString()));
         }
@@ -56,6 +73,7 @@ namespace SearchStringParser {
             phase = string.Empty;
             hasSpace = false;
             include = false;
+            exclude = false;
         }
 
         public SearchStringParseState Add(char c) {
@@ -65,9 +83,13 @@ namespace SearchStringParser {
                     return SearchStringParseState.Completed;
                 }
             }
-            if(c == settings.IncludeModificator) {
-                if(phase == string.Empty) {
+            if(phase == string.Empty) {
+                if(c == settings.IncludeModificator) {
                     include = true;
+                    return SearchStringParseState.Calculating;
+                }
+                if(c == settings.ExcludeModificator) {
+                    exclude = true;
                     return SearchStringParseState.Calculating;
                 }
             }

@@ -51,8 +51,8 @@ namespace SearchStringParser.Tests {
         static PhaseInfo[] IncludePh(string searchString) {
             return new[] { new PhaseInfo(cInclude.ToString(), SearchModificator.Include), new PhaseInfo(searchString, SearchModificator.Include) };
         }
-        static PhaseInfo ExcludePh(string searchString) {
-            return new PhaseInfo(Exclude(searchString), SearchModificator.Exclude);
+        static PhaseInfo[] ExcludePh(string searchString) {
+            return new[] { new PhaseInfo(cExclude.ToString(), SearchModificator.Exclude), new PhaseInfo(searchString, SearchModificator.Exclude) };
         }
         static PhaseInfo[] SpecificFieldPh(string field, string phase) {
             return new[] { new PhaseInfo(field, SearchModificator.Field), new PhaseInfo(cSpecificField.ToString(), SearchModificator.None), new PhaseInfo(phase) };
@@ -127,13 +127,13 @@ namespace SearchStringParser.Tests {
                 AssertPhases(ExcludePh("ab"));
             Parse(Exclude("ab c")).
                 AssertRegular("c").AssertExclude("ab").AssertInclude().
-                AssertPhases(ExcludePh("ab" + cSpace), Phase("c"));
+                AssertPhases(ExcludePh("ab"), Phase(cSpace), Phase("c"));
             Parse("ab " + Exclude("c")).
                 AssertRegular("ab").AssertExclude("c").AssertInclude().
-                AssertPhases(Phase("ab" + cSpace), ExcludePh("c"));
-            Parse(Exclude("a") + " " + Exclude("b")).
+                AssertPhases(Phase("ab"), Phase(cSpace), ExcludePh("c"));
+            Parse(Exclude("a") + cSpace + Exclude("b")).
                 AssertRegular().AssertExclude("a", "b").AssertInclude().
-                AssertPhases(ExcludePh("a" + cSpace), ExcludePh("b"));
+                AssertPhases(ExcludePh("a"), Phase(cSpace), ExcludePh("b"));
         }
         [Test]
         public void ModificatorIncludeExclude() {
@@ -286,8 +286,11 @@ namespace SearchStringParser.Tests {
         [Test]
         public void RealCase1() {
             string s = MakeSearchString("regular", Include("plus"), Exclude("minus"), SpecificField("field", "someInField"));
-            var phases = new List<PhaseInfo>() { Phase("regular" + cSpace), ExcludePh("minus" + cSpace) };
-            phases.AddRange(IncludePh("plus" + cSpace));
+            var phases = new List<PhaseInfo>() { Phase("regular" + cSpace) };
+            phases.AddRange(ExcludePh("minus"));
+            phases.Add(Phase(cSpace));
+            phases.AddRange(IncludePh("plus"));
+            phases.Add(Phase(cSpace));
             phases.AddRange(SpecificFieldPh("field", "someInField"));
             Parse(s).
                 AssertRegular("regular").AssertExclude("minus").AssertInclude("plus").AssertFieldRegular("field", "someInField").
