@@ -12,16 +12,16 @@ namespace SearchStringParser {
         bool groupStarted = false;
         bool groupFinished = false;
         int groupIndex = -1;
-        bool ignoreGrouping = false;
+        string field = null;
 
         public SearchStringPhaseBuilder(SearchStringParseSettings settings) {
             this.settings = settings;
-            Flush();
+            FlushAll();
         }
 
         public void ApplyAndFlush(SearchStringParseResult result, ref int index, ref bool ignoreGrouping) {
             if(DetectUnfinishedGroup(ref index, ref ignoreGrouping)) {
-                Flush();
+                FlushForUnfinishedGroup();
                 return;
             }
             BoundaryValues();
@@ -30,7 +30,7 @@ namespace SearchStringParser {
             result.Exclude.AddRange(r.Exclude);
             result.Include.AddRange(r.Include);
             result.PhaseInfos.AddRange(r.PhaseInfos);
-            Flush();
+            FlushAll();
         }
         bool DetectUnfinishedGroup(ref int index, ref bool ignoreGrouping) {
             if(groupStarted && !groupFinished) {
@@ -56,25 +56,25 @@ namespace SearchStringParser {
                 exclude = false;
                 phase += settings.ExcludeModificator;
             }
-            //if(groupStarted && !groupFinished) {
-            //    groupStarted = false;
-            //    phase = settings.GroupModificator + phase;
-            //}
             if(groupStarted && groupFinished && phase == string.Empty) {
                 groupStarted = false;
                 groupFinished = false;
                 phase = settings.GroupModificator.ToString() + settings.GroupModificator;
+            }
+            if(field != null && phase == string.Empty) {
+                phase = field + settings.SpecificFieldModificator;
+                field = null;
             }
         }
         void FillSearchResult(SearchStringParseResult result) {
             if(phase == String.Empty)
                 return;
             if(include)
-                result.Include.Add(new SearchStringParseInfo(phase));
+                result.Include.Add(new SearchStringParseInfo(phase, field));
             else if(exclude)
-                result.Exclude.Add(new SearchStringParseInfo(phase));
+                result.Exclude.Add(new SearchStringParseInfo(phase, field));
             else
-                result.Regular.Add(new SearchStringParseInfo(phase));
+                result.Regular.Add(new SearchStringParseInfo(phase, field));
         }
         void FillPhases(SearchStringParseResult result) {
             SearchModificator modificator = SearchModificator.None;
@@ -89,9 +89,18 @@ namespace SearchStringParser {
             }
             if(modificator != SearchModificator.None)
                 result.PhaseInfos.Add(new PhaseInfo(modificatorStr, modificator));
+            result.PhaseInfos.AddRange(GetFieldPhase());
             result.PhaseInfos.AddRange(GetPhase(modificator));
             if(hasSpace)
                 result.PhaseInfos.Add(new PhaseInfo(settings.PhaseSeparator.ToString()));
+        }
+        List<PhaseInfo> GetFieldPhase() {
+            var result = new List<PhaseInfo>();
+            if(field == null)
+                return result;
+            result.Add(new PhaseInfo(field, SearchModificator.Field));
+            result.Add(new PhaseInfo(settings.SpecificFieldModificator.ToString()));
+            return result;
         }
         List<PhaseInfo> GetPhase(SearchModificator modificator) {
             var result = new List<PhaseInfo>();
@@ -105,15 +114,18 @@ namespace SearchStringParser {
             return result;
         }
 
-        void Flush() {
+        void FlushForUnfinishedGroup() {
             phase = string.Empty;
             hasSpace = false;
-            include = false;
-            exclude = false;
             groupStarted = false;
             groupFinished = false;
             groupIndex = -1;
-            ignoreGrouping = false;
+        }
+        void FlushAll() {
+            FlushForUnfinishedGroup();
+            include = false;
+            exclude = false;
+            field = null;
         }
 
         public SearchStringParseState Add(char c, Func<char?> tryGetNextChar, int index, bool ignoreGrouping) {
@@ -138,8 +150,6 @@ namespace SearchStringParser {
                 if(!ignoreGrouping && c == settings.GroupModificator && !groupStarted) {
                     groupStarted = true;
                     groupIndex = index;
-                    if(include || exclude)
-                        groupIndex--;
                     return GetState(nextC);
                 }
             }
@@ -148,6 +158,11 @@ namespace SearchStringParser {
                     groupFinished = true;
                     return SearchStringParseState.Completed;
                 }
+            }
+            if(phase != string.Empty && c == settings.SpecificFieldModificator) {
+                field = phase;
+                phase = string.Empty;
+                return GetState(nextC);
             }
             phase += c;
             return GetState(nextC);
