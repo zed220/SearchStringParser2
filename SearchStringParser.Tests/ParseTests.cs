@@ -213,16 +213,19 @@ namespace SearchStringParser.Tests {
                 AssertPhases("a" + cGroup);
             Parse(cGroup + MakeSearchString("a", "b")).
                 AssertRegular(cGroup + "a", "b").AssertInclude().AssertExclude().
-                AssertPhases(cGroup + "a" + cSpace, "b");
+                AssertPhases(cGroup + "a", cSpace.ToString(), "b");
             Parse(Include(cGroup + MakeSearchString("a", "b"))).
                 AssertRegular("b").AssertInclude(cGroup + "a").AssertExclude().
-                AssertPhases(IncludePh(cGroup.ToString() + "a" + cSpace), Phase("b"));
+                AssertPhases(IncludePh(cGroup.ToString() + "a"), Phase(cSpace), Phase("b"));
             Parse(Include(cGroup + MakeSearchString("a", Exclude("b")))).
                 AssertRegular().AssertInclude(cGroup + "a").AssertExclude("b").
-                AssertPhases(IncludePh(cGroup + "a" + cSpace), ExcludePh("b"));
+                AssertPhases(IncludePh(cGroup + "a"), Phase(cSpace), ExcludePh("b"));
             Parse(MakeSearchString("a", cGroup + "b")).
                 AssertRegular("a", cGroup + "b").AssertInclude().AssertExclude().
-                AssertPhases("a" + cSpace, cGroup + "b");
+                AssertPhases("a", cSpace.ToString(), cGroup + "b");
+        }
+        [Test]
+        public void UnfinishedGroup_SpecificField() {
             Parse(SpecificField("f", cGroup.ToString() + "a")).
                 AssertFieldRegular("f", cGroup.ToString() + "a").
                 AssertPhases(SpecificFieldPh("f", cGroup.ToString() + "a"));
