@@ -45,7 +45,7 @@ namespace SearchStringParser {
         }
         void FillPhases(SearchStringParseResult result) {
             if(include)
-                result.PhaseInfos.Add(new PhaseInfo(phase, SearchModificator.Include));
+                result.PhaseInfos.Add(new PhaseInfo(settings.IncludeModificator.ToString(), SearchModificator.Include));
             if(phase != String.Empty)
                 result.PhaseInfos.Add(new PhaseInfo(phase, include ? SearchModificator.Include : SearchModificator.None));
             if(hasSpace)
