@@ -8,6 +8,7 @@ namespace SearchStringParser {
     public class SearchStringParser {
 
         #region Inner Types
+        enum PhaseState { None, Include, Exclude }
         enum GroupingState { None, Started, Finished, Invalid }
         enum SearchStringParseState {
             Calculating, Completed
@@ -54,8 +55,7 @@ namespace SearchStringParser {
         SearchStringParseSettings settings;
         string phase = string.Empty;
         bool hasSpace = false;
-        bool include = false;
-        bool exclude = false;
+        PhaseState phaseState = PhaseState.None;
         GroupingState groupState = GroupingState.None;
         string field = null;
         ParsingState state;
@@ -116,35 +116,46 @@ namespace SearchStringParser {
                 phase = field + settings.SpecificFieldModificator;
                 field = null;
             }
-            if(include && phase == string.Empty) {
-                include = false;
-                phase += settings.IncludeModificator;
+            if(phase != string.Empty)
+                return;
+            switch(phaseState) {
+                case PhaseState.Include:
+                    phase += settings.IncludeModificator;
+                    break;
+                case PhaseState.Exclude:
+                    phase += settings.ExcludeModificator;
+                    break;
             }
-            if(exclude && phase == string.Empty) {
-                exclude = false;
-                phase += settings.ExcludeModificator;
-            }
+            phaseState = PhaseState.None;
         }
         void FillSearchResult(SearchStringParseResult result) {
-            if(phase == String.Empty)
+            if(phase == string.Empty)
                 return;
-            if(include)
-                result.Include.Add(new SearchStringParseInfo(phase, field));
-            else if(exclude)
-                result.Exclude.Add(new SearchStringParseInfo(phase, field));
-            else
-                result.Regular.Add(new SearchStringParseInfo(phase, field));
+            var info = new SearchStringParseInfo(phase, field);
+            switch(phaseState) {
+                case PhaseState.None:
+                    result.Regular.Add(info);
+                    break;
+                case PhaseState.Include:
+                    result.Include.Add(info);
+                    break;
+                case PhaseState.Exclude:
+                    result.Exclude.Add(info);
+                    break;
+            }
         }
         void FillPhases(SearchStringParseResult result) {
             SearchModificator modificator = SearchModificator.None;
             string modificatorStr = string.Empty;
-            if(include) {
-                modificator = SearchModificator.Include;
-                modificatorStr = settings.IncludeModificator.ToString();
-            }
-            if(exclude) {
-                modificator = SearchModificator.Exclude;
-                modificatorStr = settings.ExcludeModificator.ToString();
+            switch(phaseState) {
+                case PhaseState.Include:
+                    modificator = SearchModificator.Include;
+                    modificatorStr = settings.IncludeModificator.ToString();
+                    break;
+                case PhaseState.Exclude:
+                    modificator = SearchModificator.Exclude;
+                    modificatorStr = settings.ExcludeModificator.ToString();
+                    break;
             }
             if(modificator != SearchModificator.None)
                 result.PhaseInfos.Add(new PhaseInfo(modificatorStr, modificator));
@@ -180,8 +191,7 @@ namespace SearchStringParser {
         void FlushAll() {
             FlushForUnfinishedGroup();
             groupState = GroupingState.None;
-            include = false;
-            exclude = false;
+            phaseState = PhaseState.None;
             field = null;
         }
 
@@ -193,13 +203,13 @@ namespace SearchStringParser {
                 }
             }
             if(phase == string.Empty && groupState == GroupingState.None) {
-                if(!include && !exclude && field == null) {
+                if(phaseState == PhaseState.None && field == null) {
                     if(c == settings.IncludeModificator) {
-                        include = true;
+                        phaseState = PhaseState.Include;
                         return GetState();
                     }
                     if(c == settings.ExcludeModificator) {
-                        exclude = true;
+                        phaseState = PhaseState.Exclude;
                         return GetState();
                     }
                 }
