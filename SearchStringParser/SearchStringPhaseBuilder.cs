@@ -3,14 +3,15 @@ using System.Collections.Generic;
 
 namespace SearchStringParser {
     class SearchStringPhaseBuilder {
+        enum GroupingState { None, Started, Finished }
+
         readonly SearchStringParseSettings settings;
 
         string phase = string.Empty;
         bool hasSpace = false;
         bool include = false;
         bool exclude = false;
-        bool groupStarted = false;
-        bool groupFinished = false;
+        GroupingState groupState = GroupingState.None;
         int groupIndex = -1;
         string field = null;
 
@@ -33,7 +34,7 @@ namespace SearchStringParser {
             FlushAll();
         }
         bool DetectUnfinishedGroup(ref int index, ref bool ignoreGrouping) {
-            if(groupStarted && !groupFinished) {
+            if(groupState == GroupingState.Started) {
                 index = groupIndex - 1;
                 ignoreGrouping = true;
                 return true;
@@ -48,9 +49,8 @@ namespace SearchStringParser {
             return r;
         }
         void BoundaryValues() {
-            if(groupStarted && groupFinished && phase == string.Empty) {
-                groupStarted = false;
-                groupFinished = false;
+            if(groupState == GroupingState.Finished && phase == string.Empty) {
+                groupState = GroupingState.None;
                 phase = settings.GroupModificator.ToString() + settings.GroupModificator;
             }
             if(field != null && phase == string.Empty) {
@@ -104,12 +104,11 @@ namespace SearchStringParser {
         }
         List<PhaseInfo> GetPhase(SearchModificator modificator) {
             var result = new List<PhaseInfo>();
-            bool grouped = groupStarted && groupFinished;
-            if(groupStarted && groupFinished)
+            if(groupState == GroupingState.Finished)
                 result.Add(new PhaseInfo(settings.GroupModificator.ToString(), SearchModificator.Group));
             if(phase != string.Empty)
-                result.Add(new PhaseInfo(phase, modificator, grouped));
-            if(groupStarted && groupFinished)
+                result.Add(new PhaseInfo(phase, modificator, groupState == GroupingState.Finished));
+            if(groupState == GroupingState.Finished)
                 result.Add(new PhaseInfo(settings.GroupModificator.ToString(), SearchModificator.Group));
             return result;
         }
@@ -117,8 +116,7 @@ namespace SearchStringParser {
         void FlushForUnfinishedGroup() {
             phase = string.Empty;
             hasSpace = false;
-            groupStarted = false;
-            groupFinished = false;
+            groupState = GroupingState.None;
             groupIndex = -1;
         }
         void FlushAll() {
@@ -136,7 +134,7 @@ namespace SearchStringParser {
                     return SearchStringParseState.Completed;
                 }
             }
-            if(phase == string.Empty && !groupStarted) {
+            if(phase == string.Empty && groupState == GroupingState.None) {
                 if(!include && !exclude && field == null) {
                     if(c == settings.IncludeModificator) {
                         include = true;
@@ -147,19 +145,19 @@ namespace SearchStringParser {
                         return GetState(nextC);
                     }
                 }
-                if(!ignoreGrouping && c == settings.GroupModificator && !groupStarted) {
-                    groupStarted = true;
+                if(!ignoreGrouping && c == settings.GroupModificator && groupState == GroupingState.None) {
+                    groupState = GroupingState.Started;
                     groupIndex = index;
                     return GetState(nextC);
                 }
             }
-            if(c == settings.GroupModificator && groupStarted) {
+            if(c == settings.GroupModificator && groupState == GroupingState.Started) {
                 if(!nextC.HasValue || nextC.Value == settings.PhaseSeparator) {
-                    groupFinished = true;
+                    groupState = GroupingState.Finished;
                     return SearchStringParseState.Completed;
                 }
             }
-            if(c == settings.SpecificFieldModificator && field == null && phase != string.Empty && !groupStarted) {
+            if(c == settings.SpecificFieldModificator && field == null && phase != string.Empty && groupState == GroupingState.None) {
                 field = phase;
                 phase = string.Empty;
                 return GetState(nextC);
@@ -172,7 +170,7 @@ namespace SearchStringParser {
         }
 
         bool IsPhaseEnded() {
-            if(groupStarted && !groupFinished)
+            if(groupState == GroupingState.Started)
                 return false;
             return true;
         }
