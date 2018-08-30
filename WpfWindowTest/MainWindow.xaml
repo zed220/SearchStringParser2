@@ -10,6 +10,61 @@
     <Grid>
         <StackPanel>
             <TextBox x:Name="tb" Margin="1"/>
+            <RichTextBox x:Name="editor" Margin="1">
+                <i:Interaction.Behaviors>
+                    <local:RichTextBoxColorizeBehavior>
+                        <local:RichTextBoxColorizeBehavior.RunRegularStyle>
+                            <Style TargetType="Run">
+                                <Setter Property="Foreground" Value="Black"/>
+                            </Style>
+                        </local:RichTextBoxColorizeBehavior.RunRegularStyle>
+                        <local:RichTextBoxColorizeBehavior.RunRegularGroupStyle>
+                            <Style TargetType="Run">
+                                <Setter Property="Foreground" Value="Black"/>
+                                <Setter Property="Background" Value="Yellow"/>
+                            </Style>
+                        </local:RichTextBoxColorizeBehavior.RunRegularGroupStyle>
+                        <local:RichTextBoxColorizeBehavior.RunExcludeStyle>
+                            <Style TargetType="Run">
+                                <Setter Property="Foreground" Value="Red"/>
+                            </Style>
+                        </local:RichTextBoxColorizeBehavior.RunExcludeStyle>
+                        <local:RichTextBoxColorizeBehavior.RunExcludeGroupStyle>
+                            <Style TargetType="Run">
+                                <Setter Property="Foreground" Value="Red"/>
+                                <Setter Property="Background" Value="Yellow"/>
+                            </Style>
+                        </local:RichTextBoxColorizeBehavior.RunExcludeGroupStyle>
+                        <local:RichTextBoxColorizeBehavior.RunIncludeStyle>
+                            <Style TargetType="Run">
+                                <Setter Property="Foreground" Value="Green"/>
+                            </Style>
+                        </local:RichTextBoxColorizeBehavior.RunIncludeStyle>
+                        <local:RichTextBoxColorizeBehavior.RunIncludeGroupStyle>
+                            <Style TargetType="Run">
+                                <Setter Property="Foreground" Value="Green"/>
+                                <Setter Property="Background" Value="Yellow"/>
+                            </Style>
+                        </local:RichTextBoxColorizeBehavior.RunIncludeGroupStyle>
+                        <local:RichTextBoxColorizeBehavior.RunFieldStyle>
+                            <Style TargetType="Run">
+                                <Setter Property="Foreground" Value="Blue"/>
+                            </Style>
+                        </local:RichTextBoxColorizeBehavior.RunFieldStyle>
+                        <local:RichTextBoxColorizeBehavior.RunGroupQuoteStyle>
+                            <Style TargetType="Run">
+                                <Setter Property="Foreground" Value="Gray"/>
+                            </Style>
+                        </local:RichTextBoxColorizeBehavior.RunGroupQuoteStyle>
+                    </local:RichTextBoxColorizeBehavior>
+                </i:Interaction.Behaviors>
+                <RichTextBox.Document>
+                    <FlowDocument>
+                        <Paragraph x:Name="paragraph">
+                        </Paragraph>
+                    </FlowDocument>
+                </RichTextBox.Document>
+            </RichTextBox>
             <Border BorderBrush="Black" BorderThickness="1" Padding="1" Margin="1">
                 <TextBlock>
                     <i:Interaction.Behaviors>
